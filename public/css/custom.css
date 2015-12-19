@@ -1,0 +1,12 @@
+.margin-0 {
+    margin: 0;
+}
+
+.margin-right-50 {
+    margin-right: 50px;
+}
+
+.select2-container {
+    width: 100% !important;
+    padding: 0;
+}
