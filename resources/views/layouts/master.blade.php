@@ -150,33 +150,38 @@
             <ul class="sidebar-menu">
                 <li class="header">MAIN NAVIGATION</li>
 
-                <li>
+                <li class="{{ Request::segment(1) == 'dashboard' ? "active" : null }}">
+                    <a href="{{asset("dashboard")}}">
+                        <i class="fa fa-dashboard"></i> <span>Home</span>
+                    </a>
+                </li>
+                <li class="{{ Request::segment(1) == 'companies' ? "active" : null }}">
                     <a href="{{asset("companies")}}">
                         <i class="fa fa-building"></i> <span>Companies</span>
                     </a>
                 </li>
-                <li>
-                    <a href="../widgets.html">
+                <li class="{{ Request::segment(1) == 'users' ? "active" : null }}">
+                    <a href="{{asset("users")}}">
                         <i class="fa fa-users"></i> <span>Users</span><small class="label pull-right bg-yellow">12</small>
                     </a>
                 </li>
-                <li>
-                    <a href="../widgets.html">
+                <li class="{{ Request::segment(1) == 'settings' ? "active" : null }}">
+                    <a href="{{asset("settings")}}">
                         <i class="fa fa-gear"></i> <span>Settings</span>
                     </a>
                 </li>
-                <li>
-                    <a href="../widgets.html">
+                <li class="{{ Request::segment(1) == 'rosters' ? "active" : null }}">
+                    <a href="{{asset("rosters")}}">
                         <i class="fa fa-calendar"></i> <span>Rosters</span>
                     </a>
                 </li>
-                <li>
-                    <a href="../widgets.html">
+                <li class="{{ Request::segment(1) == 'payments' ? "active" : null }}">
+                    <a href="{{asset("payments")}}">
                         <i class="fa fa-money"></i> <span>Payments</span>
                     </a>
                 </li>
-                <li>
-                    <a href="../widgets.html">
+                <li class="{{ Request::segment(1) == 'archive' ? "active" : null }}">
+                    <a href="{{asset("archive")}}">
                         <i class="fa fa-archive"></i> <span>Archive data</span>
                     </a>
                 </li>
