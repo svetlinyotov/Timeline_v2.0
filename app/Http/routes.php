@@ -10,11 +10,13 @@ Route::get('/', function () {
 Route::get('login', 'Auth\AuthController@getLogin');
 Route::post('login', 'Auth\AuthController@postLogin');
 Route::get('logout', 'Auth\AuthController@getLogout');
+Route::get('ajax/timezone', 'CommonController@timezone');
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('dashboard', function () {
         return view('dashboard');
     });
+    Route::resource('companies', 'CompaniesController');
 });
 
 Route::get('avatar/{filename?}', function ($filename = null) {
