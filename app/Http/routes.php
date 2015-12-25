@@ -16,7 +16,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('dashboard', function () {
         return view('dashboard');
     });
-    Route::resource('companies', 'CompaniesController');
+
+    Route::get('/companies/{company_id}/shifts', 'CompaniesController@shiftsShow');
+    Route::put('/companies/{company_id}/shifts', 'CompaniesController@shiftsUpdate');
+    Route::get('/companies/{company_id}/payment', 'CompaniesController@paymentShow');
+    Route::post('/companies/{company_id}/payment', 'CompaniesController@paymentStore');
+    Route::post('/companies/{company_id}/payment/custom', 'CompaniesController@paymentCustomStore');
+    Route::delete('/companies/{company_id}/payment/custom/{payment_id}', 'CompaniesController@paymentCustomDestroy');
+    Route::resource('companies', 'CompaniesController', ['only' => ['index', 'store', 'update', 'destroy']]);
 });
 
 Route::get('avatar/{filename?}', function ($filename = null) {
