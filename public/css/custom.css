@@ -5,6 +5,13 @@
 .margin-right-50 {
     margin-right: 50px;
 }
+.margin-left-20 {
+    margin-left: 20px;
+}
+
+.callout-sm {
+    padding: 9px !important;
+}
 
 .select2-container {
     width: 100% !important;
