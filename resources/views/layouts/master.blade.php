@@ -71,7 +71,7 @@
                     <li class="dropdown notifications-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-bell-o"></i>
-                            <span class="label label-warning">10</span>
+                            <span class="label label-danger">10</span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="header">You have 10 notifications</li>
@@ -157,11 +157,13 @@
                         <i class="fa fa-dashboard"></i> <span>Home</span>
                     </a>
                 </li>
+                @if(Auth::user()->role == "supadmin")
                 <li class="{{ Request::segment(1) == 'companies' ? "active" : null }}">
                     <a href="{{asset("companies")}}">
                         <i class="fa fa-building"></i> <span>Companies</span>
                     </a>
                 </li>
+                @endif
                 <li class="{{ Request::segment(1) == 'users' ? "active" : null }}">
                     <a href="{{asset("users")}}">
                         <i class="fa fa-users"></i> <span>Users</span><small class="label pull-right bg-yellow">12</small>
@@ -225,6 +227,15 @@
 <script src="{{asset("plugins/fastclick/fastclick.min.js")}}"></script>
 <script src="{{asset("js/app.js")}}"></script>
 <script src="{{asset("js/demo.js")}}"></script>
+<script src="{{asset("js/laravel.js")}}"></script>
 @yield('script')
+<script>
+    $(function(){
+        if(window.location.hash) {
+            var hash = window.location.hash;
+            $(hash).modal('toggle');
+        }
+    });
+</script>
 </body>
 </html>
