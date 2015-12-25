@@ -1,2 +1,2 @@
 
-AddHandler x-httpd-php55 .php
+AddHandler x-httpd-php70 .php
