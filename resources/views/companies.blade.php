@@ -17,21 +17,35 @@
             $("#data").DataTable({
                 columnDefs: [
                     {orderable: false, targets: -1}
-                ]
+                ],
+                "paging": false,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": false,
+                "autoWidth": true
             });
 
             $('#edit').on('show.bs.modal', function (e) {
                 var row_btn = $(e.relatedTarget);
+                if(typeof $(row_btn).data('id') != "undefined") {
+                    $(this).find('form').attr('action', $(row_btn).data('action'));
+                    $(this).find('.name').val($(row_btn).closest('tr').find('td.name').html());
+                    $(this).find('.city').val($(row_btn).closest('tr').find('td.city').html());
+                    $(this).find('.post_code').val($(row_btn).closest('tr').find('td.post_code').html());
+                    $(this).find('.address').val($(row_btn).closest('tr').find('td.address').html());
+                    $(this).find('.timezone').val($(row_btn).closest('tr').find('td.timezone').html()).change();
+                    $(this).find('.currency option').filter(function () {
+                        return $(this).text() == $(row_btn).closest('tr').find('td.currency').html()
+                    }).prop('selected', true);
+                }
 
-                $(this).find('.name').val($(row_btn).closest('tr').find('td.name').html());
-                $(this).find('.city').val($(row_btn).closest('tr').find('td.city').html());
-                $(this).find('.post_code').val($(row_btn).closest('tr').find('td.post_code').html());
-                $(this).find('.address').val($(row_btn).closest('tr').find('td.address').html());
-                $(this).find('.timezone').val($(row_btn).closest('tr').find('td.timezone').html()).change();
-                $(this).find('.currency option').filter(function () {
-                    return $(this).text() == $(row_btn).closest('tr').find('td.currency').html()
-                }).prop('selected', true);
-
+            });
+            $('#edit, #add').on('hidden.bs.modal', function (e) {
+                history.pushState("", document.title, window.location.pathname);
+                $(this).find('.has-error').removeClass('has-error');
+                $(this).find('.text-danger').addClass('hidden');
+                $(this).find('.callout').addClass('hidden');
             });
 
             $('#delete').on('show.bs.modal', function (e) {
@@ -60,6 +74,11 @@
 @section('body')
     <div class="box">
         <div class="box-body">
+            @if(Session::has('message'))
+                <div class="callout callout-success callout-sm">
+                    <i class="fa fa-check"></i> {!! Session::get('message') !!}
+                </div>
+            @endif
 
             <table id="data" class="table table-bordered table-striped">
                 <thead>
@@ -84,11 +103,13 @@
                         <td class="currency">{{$company->currency->title}}</td>
                         <td>
                             <button type="button" class="btn btn-warning btn-xs btn-edit" data-toggle="modal"
-                                    data-action="{{asset('companies/'.$company->id)}}" data-target="#edit"><i
+                                    data-action="{{asset('companies/'.$company->id)}}#edit" data-id="{{$company->id}}" data-target="#edit"><i
                                         class="fa fa-pencil"></i></button>
                             <button type="button" data-href="{{asset('companies/'.$company->id)}}"
                                     data-name="{{$company->name}}" class="btn btn-danger btn-xs" data-toggle="modal"
-                                    data-target="#delete"><i class="fa fa-trash"></i></button>
+                                    data-target="#delete"><i class="fa fa-trash"></i></button> |
+                            <a href="{{asset('companies/holidays/'.$company->id)}}" class="btn btn-info btn-xs">Holidays</a>
+                            <a href="{{asset('companies/settings/'.$company->id)}}" class="btn btn-primary btn-xs"><i class="fa fa-gear"></i> </a>
                         </td>
                     </tr>
                 @endforeach
@@ -121,47 +142,54 @@
                 <div class="modal-header panel-heading">
                     <h3 class="margin-0">Add</h3>
                 </div>
-                <form action="" method="POST">
+                <form action="{{asset('/companies')}}#add" method="POST">
                     {{csrf_field()}}
                     <div class="modal-body">
-                        <div class="form-group">
+                        @if ($errors->any())
+                            <div class='callout callout-danger callout-sm' role='alert'>
+                                <i class="fa fa-times"></i> You should fix the errors below.
+                            </div>
+                        @endif
+
+                        <div class="form-group @if($errors->first('name')) has-error @endif">
                             <label for="name_input">Name</label>
-                            <input type="text" class="form-control name" id="name_input" name="name"
-                                   value="{{old('name')}}" placeholder="Name">
+                            <input type="text" class="form-control" id="name_input" name="name" value="{{old('name')}}" placeholder="Name">
+                            {!! $errors->first('name', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('city')) has-error @endif">
                             <label for="city_input">City</label>
-                            <input type="text" class="form-control city" id="city_input" name="city"
-                                   value="{{old('city')}}" placeholder="City">
+                            <input type="text" class="form-control" id="city_input" name="city" value="{{old('city')}}" placeholder="City">
+                            {!! $errors->first('city', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('post_code')) has-error @endif">
                             <label for="post_code_input">Post Code</label>
-                            <input type="text" class="form-control post_code" id="post_code_input" name="post_code"
-                                   value="{{old('post_code')}}" placeholder="Post Code">
+                            <input type="text" class="form-control" id="post_code_input" name="post_code" value="{{old('post_code')}}" placeholder="Post Code">
+                            {!! $errors->first('post_code', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('address')) has-error @endif">
                             <label for="address_input">Address</label>
-                            <input type="text" class="form-control address" id="address_input" name="address"
-                                   value="{{old('address')}}" placeholder="Address">
+                            <input type="text" class="form-control" id="address_input" name="address" value="{{old('address')}}" placeholder="Address">
+                            {!! $errors->first('address', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('timezone')) has-error @endif">
                             <label for="timezone_input">Timezone</label>
-                            <select class="form-control timezone timezone_input" id="timezone_input" name="timezone"
-                                    style="width: 100%;">
+                            <select class="form-control timezone" id="timezone_input" name="timezone" style="width: 100%;">
                                 @foreach($timezones as $timezone)
                                     <option value="{{$timezone}}"
                                             @if($timezone == old('timezone')) selected @endif>{{$timezone}}</option>
                                 @endforeach
                             </select>
+                            {!! $errors->first('timezone', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('currency')) has-error @endif">
                             <label for="currency_input">Currency</label>
-                            <select class="form-control currency" name="currency" id="currency_input">
+                            <select class="form-control" name="currency" id="currency_input">
                                 @foreach($currency as $item)
                                     <option value="{{$item->id}}"
                                             @if($item->id == old('currency')) selected @endif>{{$item->title}}</option>
                                 @endforeach
                             </select>
+                            {!! $errors->first('currency', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
 
                     </div>
@@ -181,40 +209,46 @@
                     <h3 class="margin-0">Edit</h3>
                 </div>
                 <form action="" method="POST">
-                    <input type="hidden" name="_method" value="PUT">
+                    <input name="_method" type="hidden" value="PUT">
                     {{csrf_field()}}
                     <div class="modal-body">
-                        <div class="form-group">
+                        @if ($errors->any())
+                            <div class='callout callout-danger callout-sm' role='alert'>
+                                <i class="fa fa-times"></i> You should fix the errors below.
+                            </div>
+                        @endif
+
+                        <div class="form-group @if($errors->first('name_edit')) has-error @endif">
                             <label for="name_input">Name</label>
-                            <input type="text" class="form-control name" id="name_input" name="name_edit"
-                                   value="{{old('name_edit')}}" placeholder="Name">
+                            <input type="text" class="form-control name" id="name_input" name="name_edit" value="{{old('name_edit')}}" placeholder="Name">
+                            {!! $errors->first('name_edit', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('city_edit')) has-error @endif">
                             <label for="city_input">City</label>
-                            <input type="text" class="form-control city" id="city_input" name="city_edit"
-                                   value="{{old('city_edit')}}" placeholder="City">
+                            <input type="text" class="form-control city" id="city_input" name="city_edit" value="{{old('city_edit')}}" placeholder="City">
+                            {!! $errors->first('city_edit', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('post_code_edit')) has-error @endif">
                             <label for="post_code_input">Post Code</label>
-                            <input type="text" class="form-control post_code" id="post_code_input" name="post_code_edit"
-                                   value="{{old('post_code_edit')}}" placeholder="Post Code">
+                            <input type="text" class="form-control post_code" id="post_code_input" name="post_code_edit" value="{{old('post_code_edit')}}" placeholder="Post Code">
+                            {!! $errors->first('post_code_edit', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('address_edit')) has-error @endif">
                             <label for="address_input">Address</label>
-                            <input type="text" class="form-control address" id="address_input" name="address_edit"
-                                   value="{{old('address_edit')}}" placeholder="Address">
+                            <input type="text" class="form-control address" id="address_input" name="address_edit" value="{{old('address_edit')}}" placeholder="Address">
+                            {!! $errors->first('address_edit', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('timezone_edit')) has-error @endif">
                             <label for="timezone_input">Timezone</label>
-                            <select class="form-control timezone timezone_input" id="timezone_input"
-                                    name="timezone_edit" style="width: 100%;">
+                            <select class="form-control timezone timezone_input" id="timezone_input" name="timezone_edit" style="width: 100%;">
                                 @foreach($timezones as $timezone)
                                     <option value="{{$timezone}}"
                                             @if($timezone == old('timezone_edit')) selected @endif>{{$timezone}}</option>
                                 @endforeach
                             </select>
+                            {!! $errors->first('timezone_edit', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group @if($errors->first('currency_edit')) has-error @endif">
                             <label for="currency_input">Currency</label>
                             <select class="form-control currency" name="currency_edit" id="currency_input">
                                 @foreach($currency as $item)
@@ -222,6 +256,7 @@
                                             @if($item->id == old('currency_edit')) selected @endif>{{$item->title}}</option>
                                 @endforeach
                             </select>
+                            {!! $errors->first('currency_edit', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>
 
                     </div>
