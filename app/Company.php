@@ -14,9 +14,27 @@ class Company extends Model
         return $this->belongsTo('App\Currency');
     }
 
-    public function holidays()
+    public function users()
     {
-        return $this->hasMany('App\CompanyHolidays');
+        return $this->hasMany('App\User');
+    }
+
+    public function users_info()
+    {
+        return $this->hasManyThrough('App\PersonalInfo','App\User');
+    }
+
+    public static function listAll()
+    {
+        return Company::select('id', 'name')->get();
+    }
+
+    public static function workers($company_id = null)
+    {
+        $company = Company::find($company_id);
+        if($company == null) return false;
+
+        return $company->users_info()->select('users.id', 'names as title')->get()->map(function($item) {return collect($item)->except('company_id');});
     }
 
 }

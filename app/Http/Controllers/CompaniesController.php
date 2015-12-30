@@ -14,8 +14,9 @@ use Illuminate\Support\Facades\Auth;
 
 class CompaniesController extends Controller
 {
-    public function __construct()
+    public function __construct(Request $request)
     {
+        parent::__construct($request);
         if(Auth::user()->role != "supadmin") abort(402, "Unauthorized");
     }
 
