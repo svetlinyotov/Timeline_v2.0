@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>TIMELINE v2.0 | Blank Page</title>
+    <title>TIMELINE v2.0</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="{{asset("css/bootstrap.min.css")}}">
@@ -19,7 +19,7 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body class="hold-transition skin-yellow sidebar-mini">
+<body class="hold-transition skin-yellow sidebar-mini @if(Auth::user()->role == "worker") sidebar-collapse @endif">
 <!-- Site wrapper -->
 <div class="wrapper">
 
@@ -40,7 +40,7 @@
             </a>
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
-
+<!--
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
@@ -50,10 +50,10 @@
                             <li class="header">You have 4 messages</li>
                             <li>
                                 <ul class="menu">
-                                    <li><!-- start message -->
+                                    <li><!-- start message
                                         <a href="#">
                                             <div class="pull-left">
-                                                <img src="{{asset('avatar/'.Auth::user()->info->photo)}}" class="img-circle" alt="User Image">
+                                                <img src="" class="img-circle" alt="User Image">
                                             </div>
                                             <h4>
                                                 Support Team
@@ -61,43 +61,48 @@
                                             </h4>
                                             <p>Why not buy a new awesome theme?</p>
                                         </a>
-                                    </li><!-- end message -->
+                                    </li><!-- end message
                                 </ul>
                             </li>
                             <li class="footer"><a href="#">See All Messages</a></li>
                         </ul>
-                    </li>
+                    </li> -->
 
                     <li class="dropdown notifications-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-bell-o"></i>
-                            <span class="label label-danger">10</span>
+                            <span class="label label-danger">{{$user_notification_count}}</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header">You have 10 notifications</li>
+                            @if($user_notification_count == 0)
+                            <li class="header">You have no new notifications</li>
+                            @else
                             <li>
-                                <!-- inner menu: contains the actual data -->
                                 <ul class="menu">
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-users text-aqua"></i> 5 new members joined today
-                                        </a>
-                                    </li>
+                                    @foreach($user_notification_list as $list)
+                                        <li> <i class="fa fa-{{$list['icon']}} text-aqua pull-left" style="margin: 10px;"></i>
+                                            <a href="{{$list['link']}}?noti={{$list['id']}}">
+                                               {!! $list['text'] !!}
+                                                <small class="pull-right">{{$list['date']}}</small>
+                                            </a>
+                                        </li>
+                                    @endforeach
                                 </ul>
                             </li>
-                            <li class="footer"><a href="#">View all</a></li>
+                            @endif
+                            <li class="footer"><a href="{{asset('profile')}}#notifications">View all</a></li>
                         </ul>
                     </li>
 
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <img src="{{asset('avatar/'.Auth::user()->info->photo)}}" class="user-image" alt="User Image">
+                            <img src="{{asset('avatar/'.Auth::user()->info->avatar)}}" class="user-image" alt="User Image">
                             <span class="hidden-xs">{{Auth::user()->info->names}}</span>
                         </a>
                         <ul class="dropdown-menu">
                             <!-- User image -->
                             <li class="user-header">
-                                <img src="{{asset('avatar/'.Auth::user()->info->photo)}}" class="img-circle" alt="User Image">
+                                <img src="{{asset('avatar/'.Auth::user()->info->avatar)}}" class="img-circle" alt="User Image">
                                 <p>
                                     {{Auth::user()->info->names}}
                                     <small>Member since {{date('jS M Y', strtotime(Auth::user()->created_at))}}</small>
@@ -106,19 +111,19 @@
                             <!-- Menu Body -->
                             <li class="user-body">
                                 <div class="col-xs-6 text-center">
-                                    <a href="#">Messages</a>
+                                    <a href="{{asset('profile')}}#messages">Messages</a>
                                 </div>
                                 <div class="col-xs-6 text-center">
-                                    <a href="#">Notifications</a>
+                                    <a href="{{asset('profile')}}#notifications">Notifications</a>
                                 </div>
                             </li>
                             <!-- Menu Footer-->
                             <li class="user-footer">
                                 <div class="pull-left">
-                                    <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                    <a href="{{asset('profile')}}" class="btn btn-default btn-flat">Profile</a>
                                 </div>
                                 <div class="pull-right">
-                                    <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                                    <a href="{{asset('logout')}}" class="btn btn-default btn-flat">Sign out</a>
                                 </div>
                             </li>
                         </ul>
@@ -140,7 +145,7 @@
 
             <div class="user-panel">
                 <div class="pull-left image">
-                    <img src="{{asset('avatar/'.Auth::user()->info->photo)}}" class="img-circle" alt="User Image">
+                    <img src="{{asset('avatar/'.Auth::user()->info->avatar)}}" class="img-circle" alt="User Image">
                 </div>
                 <div class="pull-left info">
                     <p>{{Auth::user()->info->names}}</p>
@@ -152,43 +157,51 @@
             <ul class="sidebar-menu">
                 <li class="header">MAIN NAVIGATION</li>
 
-                <li class="{{ Request::segment(1) == 'dashboard' ? "active" : null }}">
-                    <a href="{{asset("dashboard")}}">
-                        <i class="fa fa-dashboard"></i> <span>Home</span>
-                    </a>
-                </li>
-                @if(Auth::user()->role == "supadmin")
-                <li class="{{ Request::segment(1) == 'companies' ? "active" : null }}">
-                    <a href="{{asset("companies")}}">
-                        <i class="fa fa-building"></i> <span>Companies</span>
-                    </a>
-                </li>
+                    <li class="{{ Request::segment(1) == 'profile' ? "active" : null }}">
+                        <a href="{{asset("profile")}}">
+                            <i class="fa fa-user"></i> <span>Profile</span>
+                        </a>
+                    </li>
+                @if(Auth::user()->role == "worker")
+                   <!-- <li class="{{ Request::segment(1) == 'availability' ? "active" : null }}">
+                        <a href="{{asset("availability")}}">
+                            <i class="fa fa-clock-o"></i> <span>Availability</span>
+                        </a>
+                    </li>-->
                 @endif
-                <li class="{{ Request::segment(1) == 'users' ? "active" : null }}">
-                    <a href="{{asset("users")}}">
-                        <i class="fa fa-users"></i> <span>Users</span><small class="label pull-right bg-yellow">12</small>
-                    </a>
-                </li>
-                <li class="{{ Request::segment(1) == 'settings' ? "active" : null }}">
-                    <a href="{{asset("settings")}}">
-                        <i class="fa fa-gear"></i> <span>Settings</span>
-                    </a>
-                </li>
-                <li class="{{ Request::segment(1) == 'rosters' ? "active" : null }}">
-                    <a href="{{asset("rosters")}}">
-                        <i class="fa fa-calendar"></i> <span>Rosters</span>
-                    </a>
-                </li>
-                <li class="{{ Request::segment(1) == 'payments' ? "active" : null }}">
-                    <a href="{{asset("payments")}}">
-                        <i class="fa fa-money"></i> <span>Payments</span>
-                    </a>
-                </li>
-                <li class="{{ Request::segment(1) == 'archive' ? "active" : null }}">
-                    <a href="{{asset("archive")}}">
-                        <i class="fa fa-archive"></i> <span>Archive data</span>
-                    </a>
-                </li>
+                @if(Auth::user()->role == "supadmin")
+                    <li class="{{ Request::segment(1) == 'companies' ? "active" : null }}">
+                        <a href="{{asset("companies")}}">
+                            <i class="fa fa-building"></i> <span>Companies</span>
+                        </a>
+                    </li>
+                @endif
+                @if(Auth::user()->role != "worker")
+                    <li class="{{ Request::segment(1) == 'users' ? "active" : null }}">
+                        <a href="{{asset("users")}}">
+                            <i class="fa fa-users"></i> <span>Users</span>
+                        </a>
+                    </li>
+                @endif
+                    <li class="{{ Request::segment(1) == 'rosters' ? "active" : null }}">
+                        <a href="{{asset("rosters")}}">
+                            <i class="fa fa-calendar"></i> <span>Rosters</span>
+                        </a>
+                    </li>
+                @if(Auth::user()->role != "worker")
+                    <!--<li class="{{ Request::segment(1) == 'payments' ? "active" : null }}">
+                        <a href="{{asset("payments")}}">
+                            <i class="fa fa-money"></i> <span>Payments</span>
+                        </a>
+                    </li>-->
+                @endif
+                @if(Auth::user()->role == "supadmin")
+                    <!--<li class="{{ Request::segment(1) == 'archive' ? "active" : null }}">
+                        <a href="{{asset("archive")}}">
+                            <i class="fa fa-archive"></i> <span>Archive data</span>
+                        </a>
+                    </li>-->
+                @endif
 
             </ul>
         </section>
@@ -222,6 +235,7 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
 <script src="{{asset("plugins/jQuery/jQuery-2.1.4.min.js")}}"></script>
 <script src="{{asset("js/bootstrap.min.js")}}"></script>
 <script src="{{asset("plugins/fastclick/fastclick.min.js")}}"></script>
@@ -233,7 +247,16 @@
     $(function(){
         if(window.location.hash) {
             var hash = window.location.hash;
-            $(hash).modal('toggle');
+            if($(hash).hasClass('modal')) {
+                $(hash).modal('toggle');
+            }
+
+            if (hash) {
+                $('.nav-tabs a[href='+hash+']').tab('show');
+            }
+            $('.nav-tabs a').on('shown.bs.tab', function (e) {
+                window.location.hash = e.target.hash;
+            });
         }
     });
 </script>
