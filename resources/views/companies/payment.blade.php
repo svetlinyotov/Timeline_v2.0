@@ -56,8 +56,8 @@
 @section('title')
     <h1>
         <a href="{{asset("companies")}}" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
-        {{$company_name}} - Payment
-        <small></small>
+        {{$company_name}}
+        <small>Payment</small>
     </h1>
     <ol class="breadcrumb">
         <li><a href="{{asset("dashboard")}}"><i class="fa fa-building-o"></i> Home</a></li>
