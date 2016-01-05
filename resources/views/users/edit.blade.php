@@ -104,6 +104,9 @@
                     <div class="input-group">
                         <div class="input-group-addon"><i class="fa fa-building"></i> </div>
                         <select name="company" class="form-control">
+                            @if(Auth::user()->role == "supadmin")
+                                <option></option>
+                            @endif
                             @foreach($companies as $company)
                                 <option value="{{$company->id}}" {{(old('company')??$user->company_id)==$company->id?'selected':null}}>{{$company->name}}</option>
                             @endforeach

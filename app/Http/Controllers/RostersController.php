@@ -86,7 +86,7 @@ class RostersController extends Controller
 
         if(Auth::user()->role != "worker") {
             $this->validate($request, [
-                'time_range' => ['regex:/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}\s(AM|PM)\s-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}\s(AM|PM)/'],
+                'time_range' => ['regex:/[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}\s(AM|PM)\s-\s[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}\s(AM|PM)/'],
                 'address' => 'required',
                 'coordinates' => 'required',
                 'name' => 'required',

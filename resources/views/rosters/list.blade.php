@@ -209,7 +209,11 @@
                 var id = button.data('id');
                 var name = button.data('name');
 
-                var modal = $(this)
+                var modal = $(this);
+                modal.find("#address_type").val("");
+                modal.find("#address").html("");
+                modal.find("#coordinates_type").val("");
+                modal.find("#coordinates").html("");
                 modal.find('.modal-title').text('New roster - ' + name);
                 modal.find('input[name=_action]').val('{{asset('/users')}}/'+id+'/roster#add');
             }).on('hidden.bs.modal', function (e) {

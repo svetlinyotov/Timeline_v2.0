@@ -1,7 +1,7 @@
 var defaultpos = new google.maps.LatLng(42.90221762882881,23.799324822425888);
 var geocoder;
-var marker;
-var map;
+var marker2;
+var map2;
 var infowindow = new google.maps.InfoWindow();
 var input;
 
@@ -13,33 +13,33 @@ function initialize() {
         center: defaultpos
     };
 
-    map = new google.maps.Map(document.getElementById("map-address-new"),
+    map2 = new google.maps.Map(document.getElementById("map-address-new"),
         mapOptions);
 
-    marker = new google.maps.Marker({
-        map:map,
+    marker2 = new google.maps.Marker({
+        map:map2,
         draggable:true,
         animation: google.maps.Animation.DROP,
         position: defaultpos
     });
-    google.maps.event.addListener(marker, 'click', toggleBounce);
-    google.maps.event.addListener(marker, 'dragend', function(evt){
-        document.getElementById('coordinates_edit_text').innerHTML = marker.getPosition().lat() + "," + marker.getPosition().lng();
-        document.getElementById('coordinates_edit').value = marker.getPosition().lat() + "," + marker.getPosition().lng();
+    google.maps.event.addListener(marker2, 'click', toggleBounce);
+    google.maps.event.addListener(marker2, 'dragend', function(evt){
+        document.getElementById('coordinates_edit_text').innerHTML = marker2.getPosition().lat() + "," + marker2.getPosition().lng();
+        document.getElementById('coordinates_edit').value = marker2.getPosition().lat() + "," + marker2.getPosition().lng();
     });
-    google.maps.event.addListener(marker, 'dragend', function(evt){
+    google.maps.event.addListener(marker2, 'dragend', function(evt){
         document.getElementById('address_search').value = "";
     });
-    google.maps.event.addListener(marker, 'dragend', codeLatLngNew);
-    map.setCenter(new google.maps.LatLng(marker.getPosition().lat(), marker.getPosition().lng()));
+    google.maps.event.addListener(marker2, 'dragend', codeLatLngNew);
+    map2.setCenter(new google.maps.LatLng(marker2.getPosition().lat(), marker2.getPosition().lng()));
 }
 
 function toggleBounce() {
 
-    if (marker.getAnimation() != null) {
-        marker.setAnimation(null);
+    if (marker2.getAnimation() != null) {
+        marker2.setAnimation(null);
     } else {
-        marker.setAnimation(google.maps.Animation.BOUNCE);
+        marker2.setAnimation(google.maps.Animation.BOUNCE);
     }
 }
 
@@ -49,16 +49,16 @@ function codeAddressNew() {
         if (status == google.maps.GeocoderStatus.OK) {
             document.getElementById("coordinates_edit_text").innerHTML = results[0].geometry.location;
             document.getElementById("coordinates_edit").value = results[0].geometry.location;
-            marker.setPosition(results[0].geometry.location);
+            marker2.setPosition(results[0].geometry.location);
             codeLatLngNew(results[0].geometry.location);
-            map.setZoom(11);
-            map.setCenter(google.maps.LatLng(marker.getPosition().lat(), marker.getPosition().lng()));
+            map2.setZoom(11);
+            map2.setCenter(google.maps.LatLng(marker2.getPosition().lat(), marker2.getPosition().lng()));
         }
     });
 }
 
 function codeLatLngNew(input) {
-    input = marker.getPosition().lat() + "," + marker.getPosition().lng();
+    input = marker2.getPosition().lat() + "," + marker2.getPosition().lng();
     var latlngStr = input.split(',', 2);
     var lat = parseFloat(latlngStr[0]);
     var lng = parseFloat(latlngStr[1]);
@@ -66,8 +66,8 @@ function codeLatLngNew(input) {
     geocoder.geocode({'latLng': latlng}, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
             if (results[1]) {
-                map.setCenter(new google.maps.LatLng(marker.getPosition().lat(), marker.getPosition().lng()));
-                map.setZoom(11);
+                map2.setCenter(new google.maps.LatLng(marker2.getPosition().lat(), marker2.getPosition().lng()));
+                map2.setZoom(11);
                 document.getElementById('address_edit_text').innerHTML=results[0].formatted_address;
                 document.getElementById('address_edit').value=results[0].formatted_address;
             } else {
