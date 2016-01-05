@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +24,12 @@ class UsersController extends Controller
     {
         parent::__construct($request);
         $this->middleware('auth.notWorker', ['except' => ['show', 'edit', 'update']]);
+
+        Event::listen('auth.login', function($user) {
+            $user->last_login = new \DateTime('now');
+
+            $user->save();
+        });
     }
 
     public function index()
@@ -152,6 +159,7 @@ class UsersController extends Controller
         ];
 
         if(Auth::user()->role == "supadmin") $rules['company'] = 'required';
+        if( $request->input('type') == "supadmin") $rules['company'] = '';
         if(Auth::user()->role != "worker") $rules['type'] = 'required';
 
         $this->validate($request, $rules);
@@ -174,7 +182,7 @@ class UsersController extends Controller
 
         $user = User::find($id);
         if(Auth::user()->role == "supadmin")
-            $user->company_id = $request->input('company');
+            $user->company_id = $request->has('company') ? $request->input('company') : null;
         if(Auth::user()->role != "worker")
             $user->role = $request->input('type');
         if($request->input('password') != null)
