@@ -44,7 +44,7 @@
                 <div class="col-xs-8">
                     <div class="checkbox icheck">
                         <label>
-                            <input type="checkbox" name="remember"> Remember Me
+                           <input type="checkbox" name="remember"> Remember Me
                         </label>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
             </div>
         </form>
 
-        <a href="#">I forgot my password</a><br>
+        <!--<a href="#">I forgot my password</a><br>-->
 
     </div>
     <!-- /.login-box-body -->

@@ -27,6 +27,10 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['middleware' => 'auth.notWorker'], function () {
         Route::post('/users/{user_id}/roster', 'RostersController@store');
+
+        Route::get('payments', 'PaymentsController@index');
+        Route::get('payments/user/{user_id}/shifts', 'PaymentsController@edit');
+        Route::put('payments/user/{user_id}/shifts', 'PaymentsController@update');
     });
     Route::resource('users', 'UsersController');
     Route::get('/rosters', 'RostersController@index');
@@ -34,7 +38,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/rosters/workers/{company_id}', 'RostersController@workers');
     Route::get('/rosters/events/{company_id}', 'RostersController@events');
     Route::post('/rosters/events/{event_id}', 'RostersController@updateEvent');
-
 });
 
 Route::get('avatar/{filename?}', function ($filename = null) {

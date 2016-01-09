@@ -189,11 +189,11 @@
                         </a>
                     </li>
                 @if(Auth::user()->role != "worker")
-                    <!--<li class="{{ Request::segment(1) == 'payments' ? "active" : null }}">
+                    <li class="{{ Request::segment(1) == 'payments' ? "active" : null }}">
                         <a href="{{asset("payments")}}">
                             <i class="fa fa-money"></i> <span>Payments</span>
                         </a>
-                    </li>-->
+                    </li>
                 @endif
                 @if(Auth::user()->role == "supadmin")
                     <!--<li class="{{ Request::segment(1) == 'archive' ? "active" : null }}">
@@ -235,7 +235,7 @@
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
 <script src="{{asset("plugins/jQuery/jQuery-2.1.4.min.js")}}"></script>
 <script src="{{asset("js/bootstrap.min.js")}}"></script>
 <script src="{{asset("plugins/fastclick/fastclick.min.js")}}"></script>

@@ -2,6 +2,8 @@
 
 namespace App;
 
+use \DateTime;
+
 class Common
 {
     public static function timezone()
@@ -17,6 +19,12 @@ class Common
     public static function formatDateTimeFromSQL($time) : string
     {
         return date('jS M Y, h:iA', strtotime($time));
+    }
+
+    public static function formatDateTimeFromSQLSingle($time)
+    {
+        if($time == "") return null;
+        return date('m/d/Y g:i A', strtotime($time));
     }
 
     public static function formatTimeForSQL($time) : string
@@ -37,6 +45,23 @@ class Common
     public static function isInTheFuture($time) : bool
     {
         return (strtotime($time) - strtotime("now")) > 0;
+    }
+
+    public static function isTimeBetween($current, $start, $end)
+    {
+        $date1 = DateTime::createFromFormat('H:i:s', $current);
+        $date2 = DateTime::createFromFormat('H:i:s', $start);
+        $date3 = DateTime::createFromFormat('H:i:s', $end);
+        if ($date1 > $date2 && $date1 <= $date3)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static function hourDiff($start, $end)
+    {
+        return (strtotime($end) - strtotime($start)) / (60*60);
     }
 
     public static function generateStrongPassword($length = 9, $add_dashes = false, $available_sets = 'luds')
