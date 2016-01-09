@@ -46,7 +46,7 @@
 
 @section('title')
     <h1>
-        @if(Request::segment(1) != 'profile')<a href="{{asset("users")}}" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
+        @if(Request::segment(1) != 'profile')<a href="@if(isset($_GET['rel']) && $_GET['rel'] == "payment"){{asset("payments?company_id=".$user->company_id)}} @else {{asset("users")}} @endif" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
             Users - {{$user->info->names}}
             <small>view</small>
         @else
@@ -79,7 +79,7 @@
                     <img class="profile-user-img img-responsive img-circle" src="{{asset('avatar/'.$user->info->avatar)}}" alt="User profile picture">
                     <h3 class="profile-username text-center">{{$user->info->names}}</h3>
                     <p class="text-muted text-center">{{$user->email}}</p>
-
+<!--
                     <ul class="list-group list-group-unbordered">
                         <li class="list-group-item">
                             <b>Rosters count last month</b> <a class="pull-right">0</a>
@@ -91,7 +91,7 @@
                             <b>Amount earned last month</b> <a class="pull-right">0</a>
                         </li>
                     </ul>
-
+-->
                 </div>
             </div>
 
