@@ -32,14 +32,14 @@
 @stop
 
 @section('script')
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp&sensor=true"></script>
+    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp&sensor=true"></script>
     <script src="{{asset("/plugins/fullcalendar/fullcalendar.min.js")}}"></script>
     <script src="{{asset("/plugins/fullcalendar/scheduler.min.js")}}"></script>
     @if(Auth::user()->role != "worker")
         <script src="{{asset("js/mapAddUser.js")}}"></script>
     @endif
     <script src="{{asset("js/mapRosters.js")}}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
     <script src="{{asset("plugins/daterangepicker/daterangepicker.js")}}"></script>
     <script src="{{asset("plugins/iCheck/icheck.min.js")}}"></script>
     <script src="{{asset("plugins/bootstrap-notify/bootstrap-notify.min.js")}}"></script>
