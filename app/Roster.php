@@ -66,7 +66,7 @@ class Roster extends Model
         return count($query) != 0;
     }
 
-    public static function payment($id)
+    public static function payment($id) : float
     {
         $company_id = Roster::find($id)->user->company_id;
         $company_shift_start = Company::where('id', $company_id)->select('shift_day_start as day', 'shift_night_start as night')->first();
