@@ -45,21 +45,23 @@
 @stop
 
 @section('title')
-    <h1>
+    <h2>
+
         @if(Request::segment(1) != 'profile')<a href="@if(isset($_GET['rel']) && $_GET['rel'] == "payment"){{asset("payments?company_id=".$user->company_id)}} @else {{asset("users")}} @endif" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
-            Users - {{$user->info->names}}
-            <small>view</small>
+        Users - {{$user->info->names}}
+        <small>view</small>
         @else
             Profile
         @endif
-    </h1>
+
+    </h2>
     <ol class="breadcrumb">
         <li><a href="{{asset("dashboard")}}"><i class="fa fa-user"></i> Home</a></li>
         @if(Request::segment(1) != 'profile')
-        <li><a href="{{asset("users")}}">Users</a></li>
-        <li>{{$user->info->names}}</li>
+            <li><a href="{{asset("users")}}">Users</a></li>
+            <li>{{$user->info->names}}</li>
         @else
-        <li>{{$user->info->names}}</li>
+            <li>{{$user->info->names}}</li>
         @endif
     </ol>
 @stop
@@ -71,118 +73,244 @@
         </div>
     @endif
 
-    <div class="row">
-        <div class="col-md-3">
+    <div class="row m-b-lg m-t-lg">
+        <div class="col-md-6">
 
-            <div class="box box-primary">
-                <div class="box-body box-profile">
-                    <img class="profile-user-img img-responsive img-circle" src="{{asset('avatar/'.$user->info->avatar)}}" alt="User profile picture">
-                    <h3 class="profile-username text-center">{{$user->info->names}}</h3>
-                    <p class="text-muted text-center">{{$user->email}}</p>
-<!--
-                    <ul class="list-group list-group-unbordered">
-                        <li class="list-group-item">
-                            <b>Rosters count last month</b> <a class="pull-right">0</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Working time last month</b> <a class="pull-right">0</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Amount earned last month</b> <a class="pull-right">0</a>
-                        </li>
-                    </ul>
--->
+            <div class="profile-image">
+                <img src="{{asset('avatar/'.Auth::user()->info->avatar)}}" class="img-circle circle-border m-b-md" alt="profile">
+            </div>
+            <div class="profile-info">
+                <div class="">
+                    <div>
+                        <h2 class="no-margins">
+                            {{$user->info->names}}
+                        </h2>
+                        <h4>{{$user->role}}</h4>
+                        <small>
+                            Companies: //TODO
+                        </small>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-3">
+            <table class="table small m-b-xs">
+                <tbody>
+                <tr>
+                    <td>
+                        Rosters count last month <strong>0</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Working time last  <strong>0</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Amount earned last month <strong>0</strong>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-3">
+            <small>Working last week</small>
+            <h2 class="no-margins">206 480</h2>
+            <div id="sparkline1"></div>
+        </div>
 
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">About</h3>
-                </div>
-                <div class="box-body">
+
+    </div>
+    <div class="row">
+
+        <div class="col-lg-3">
+
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>About {{$user->info->names}}</h3>
+                    <hr>
                     <strong><i class="fa fa-building margin-r-5"></i>  Company</strong>
                     <p class="text-muted">
                         {{$user->company != null ? $user->company->name:''}}
                     </p>
 
-                    <hr>
 
                     <strong><i class="fa fa-map-marker margin-r-5"></i> Address</strong>
                     <p class="text-muted">{{$user->info->address}}</p>
 
-                    <hr>
 
                     @if($user->info->birth_date)
-                    <strong><i class="fa fa-calendar margin-r-5"></i> Birth date</strong>
-                    <p class="text-muted">{{$user->info->birth_date}}</p>
+                        <strong><i class="fa fa-calendar margin-r-5"></i> Birth date</strong>
+                        <p class="text-muted">{{$user->info->birth_date}}</p>
 
-                    <hr>
                     @endif
 
                     <strong><i class="fa fa-mobile margin-r-5"></i> Mobile</strong>
                     <p class="text-muted">{{$user->info->mobile}}</p>
 
-                    <hr>
 
                     @if($user->info->home_phone)
-                    <strong><i class="glyphicon glyphicon-phone-alt margin-r-5"></i> Home phone</strong>
-                    <p class="text-muted">{{$user->info->home_phone}}</p>
+                        <strong><i class="glyphicon glyphicon-phone-alt margin-r-5"></i> Home phone</strong>
+                        <p class="text-muted">{{$user->info->home_phone}}</p>
 
-                    <hr>
                     @endif
 
                     @if($user->info->work_phone)
-                    <strong><i class="fa fa-phone margin-r-5"></i> Work phone</strong>
-                    <p class="text-muted">{{$user->info->work_phone}}</p>
+                        <strong><i class="fa fa-phone margin-r-5"></i> Work phone</strong>
+                        <p class="text-muted">{{$user->info->work_phone}}</p>
 
-                    <hr>
                     @endif
 
                     @if($user->info->fax)
-                    <strong><i class="fa fa-fax margin-r-5"></i> Fax</strong>
-                    <p class="text-muted">{{$user->info->fax}}</p>
+                        <strong><i class="fa fa-fax margin-r-5"></i> Fax</strong>
+                        <p class="text-muted">{{$user->info->fax}}</p>
 
-                    <hr>
                     @endif
 
                     @if($user->info->other)
-                    <strong><i class="fa fa-sticky-note-o margin-r-5"></i> Other</strong>
-                    <p class="text-muted">{{$user->info->other}}</p>
+                        <strong><i class="fa fa-sticky-note-o margin-r-5"></i> Other</strong>
+                        <p class="text-muted">{{$user->info->other}}</p>
 
-                    <hr>
                     @endif
 
                 </div>
             </div>
+
+            @if(Auth::user()->id != $user->id)
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>Private message</h3>
+
+                    <p class="small">
+                        Send message to {{$user->info->names}}
+                    </p>
+
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="email" class="form-control" placeholder="Message subject">
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" placeholder="Your message" rows="3"></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-block">Send</button>
+
+                </div>
+            </div>
+            @endif
+
         </div>
 
-        <div class="col-md-9">
-            <div class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
-                    <!--<li><a href="#calendar" data-toggle="tab">Calendar</a></li>-->
-                    <li class="active"><a href="#notifications" data-toggle="tab">Notifications &nbsp;@if($notification_count > 0) <small class="label pull-right bg-yellow">{{$notification_count}}</small> @endif </a></li>
-                    <!--<li><a href="#messages" data-toggle="tab">Messages &nbsp;<small class="label pull-right bg-yellow">12</small></a></li>-->
-                    <li class="pull-right top-warning"><a href="{{asset('users/'.$user->id.'/edit?rel=edit')}}"><i class="fa fa-pencil"></i> Edit</a></li>
-                </ul>
-                <div class="tab-content">
-                    <!--
-                    <div class="active tab-pane" id="calendar">
-                        <h3>Calendar in development</h3>
-                    </div>
-                    -->
-                    <div class="active tab-pane" id="notifications">
-                        <div class="list-group">
-                            @foreach($notification_list as $notification)
-                                <a href="{{$notification['link']}}?noti={{$notification['id']}}" class="list-group-item @if($notification['is_read'] == 0) list-group-item-warning @endif">
-                                    {!! $notification['text'] !!}
-                                    <small class="pull-right">{{$notification['date']}}</small>
-                                </a>
-                            @endforeach
-                        </div>
+        <div class="col-lg-5">
+
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>Notifications <small>(unseen)</small> </h3>
+
+                    <div class="list-group">
+                        @foreach($notification_list as $notification)
+                            <a href="{{$notification['link']}}?noti={{$notification['id']}}" class="list-group-item @if($notification['is_read'] == 0) list-group-item-warning @endif">
+                                {!! $notification['text'] !!}
+                                <small class="pull-right">{{$notification['date']}}</small>
+                            </a>
+                        @endforeach
                     </div>
                 </div>
             </div>
+
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>Messages <small>(unseen)</small> </h3>
+
+                    <div class="list-group">
+                        @foreach($notification_list as $notification)
+                            <a href="{{$notification['link']}}?noti={{$notification['id']}}" class="list-group-item @if($notification['is_read'] == 0) list-group-item-warning @endif">
+                                {!! $notification['text'] !!}
+                                <small class="pull-right">{{$notification['date']}}</small>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
         </div>
+
+        <div class="col-lg-4 m-b-lg">
+            <div id="vertical-timeline" class="vertical-container light-timeline no-margins">
+                <div class="vertical-timeline-block">
+                    <div class="vertical-timeline-icon navy-bg">
+                        <i class="fa fa-briefcase"></i>
+                    </div>
+
+                    <div class="vertical-timeline-content">
+                        <h2>Meeting</h2>
+                        <p>Conference on the sales results for the previous year. Monica please examine sales trends in marketing and products. Below please find the current status of the sale.
+                        </p>
+                        <a href="#" class="btn btn-sm btn-primary"> More info</a>
+                                    <span class="vertical-date">
+                                        Today <br>
+                                        <small>Dec 24</small>
+                                    </span>
+                    </div>
+                </div>
+
+                <div class="vertical-timeline-block">
+                    <div class="vertical-timeline-icon blue-bg">
+                        <i class="fa fa-file-text"></i>
+                    </div>
+
+                    <div class="vertical-timeline-content">
+                        <h2>Send documents to Mike</h2>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since.</p>
+                        <a href="#" class="btn btn-sm btn-success"> Download document </a>
+                                    <span class="vertical-date">
+                                        Today <br>
+                                        <small>Dec 24</small>
+                                    </span>
+                    </div>
+                </div>
+
+                <div class="vertical-timeline-block">
+                    <div class="vertical-timeline-icon lazur-bg">
+                        <i class="fa fa-coffee"></i>
+                    </div>
+
+                    <div class="vertical-timeline-content">
+                        <h2>Coffee Break</h2>
+                        <p>Go to shop and find some products. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's. </p>
+                        <a href="#" class="btn btn-sm btn-info">Read more</a>
+                        <span class="vertical-date"> Yesterday <br><small>Dec 23</small></span>
+                    </div>
+                </div>
+
+                <div class="vertical-timeline-block">
+                    <div class="vertical-timeline-icon yellow-bg">
+                        <i class="fa fa-phone"></i>
+                    </div>
+
+                    <div class="vertical-timeline-content">
+                        <h2>Phone with Jeronimo</h2>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde? Iste voluptatibus minus veritatis qui ut.</p>
+                        <span class="vertical-date">Yesterday <br><small>Dec 23</small></span>
+                    </div>
+                </div>
+
+                <div class="vertical-timeline-block">
+                    <div class="vertical-timeline-icon navy-bg">
+                        <i class="fa fa-comments"></i>
+                    </div>
+
+                    <div class="vertical-timeline-content">
+                        <h2>Chat with Monica and Sandra</h2>
+                        <p>Web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like). </p>
+                        <span class="vertical-date">Yesterday <br><small>Dec 23</small></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
 @stop
