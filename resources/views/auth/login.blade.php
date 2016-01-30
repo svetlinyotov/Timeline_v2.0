@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>TIMELINE v2.0 | Log in</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="{{asset("css/bootstrap.min.css")}}">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="{{asset("css/AdminLTE.min.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/iCheck/square/blue.css")}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <title>TimeTracker | Login</title>
+
+    <link href="{{asset('css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{asset('font-awesome/css/font-awesome.css')}}" rel="stylesheet">
+
+    <link href="{{asset('css/plugins/iCheck/custom.css')}}" rel="stylesheet">
+    <link href="{{asset('css/animate.css')}}" rel="stylesheet">
+    <link href="{{asset('css/style.css')}}" rel="stylesheet">
+
 </head>
-<body class="hold-transition login-page">
-<div class="login-box">
-    <div class="login-logo">
-        <a href="{{asset("/")}}"><b>TIMELINE</b> v2.0</a>
-    </div>
 
-    <div class="login-box-body">
-        <p class="login-box-msg">Sign in to start your session</p>
+<body class="gray-bg md-skin">
 
-        <form action="{{asset('/login')}}" method="post">
+<div class="middle-box text-center loginscreen animated fadeInDown">
+    <div>
+        <div>
+            <h1 class="logo-name">TT<sup><small>v2.5</small></sup></h1>
+        </div>
+
+        <h3>Welcome to TimeTracker v2.5</h3>
+        <p>Sign in to start your session
+        </p>
+        <form class="m-t" role="form" action="{{asset('/login')}}" method="post">
             {!! csrf_field() !!}
 
             @if ($errors->any())
@@ -33,47 +36,50 @@
             @endif
 
             <div class="form-group has-feedback">
-                <input type="email" class="form-control" name="email" placeholder="Email" value="{{ old('email') }}">
+                <input type="email" name="email" class="form-control" placeholder="Email" required="" value="{{ old('email') }}">
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input type="password" class="form-control" name="password" placeholder="Password">
+                <input type="password" name="password" class="form-control" placeholder="Password" required="">
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
             <div class="row">
-                <div class="col-xs-8">
+                <div class="col-xs-8 text-left">
                     <div class="checkbox icheck">
                         <label>
-                           <input type="checkbox" name="remember"> Remember Me
+                            <input type="checkbox" name="remember"> Remember Me
                         </label>
                     </div>
                 </div>
 
                 <div class="col-xs-4">
-                    <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                    <button type="submit" class="btn btn-primary btn-block btn-flat m-b">Sign In</button>
                 </div>
 
             </div>
+
+            <a href="#"><small>Forgot password?</small></a>
+            <p class="text-muted text-center"><small>Do not have an account?</small></p>
+            <a class="btn btn-sm btn-white btn-block" href="register.html">Create an account</a>
         </form>
-
-        <!--<a href="#">I forgot my password</a><br>-->
-
+        <p class="m-t"> <small>&copy; {{date("Y")}} SnSDevelop</small> </p>
     </div>
-    <!-- /.login-box-body -->
 </div>
-<!-- /.login-box -->
 
-<script src="{{asset("plugins/jQuery/jQuery-2.1.4.min.js")}}"></script>
-<script src="{{asset("bootstrap/js/bootstrap.min.js")}}"></script>
-<script src="{{asset("plugins/iCheck/icheck.min.js")}}"></script>
+<!-- Mainly scripts -->
+<script src="{{asset('js/jquery-2.1.1.js')}}"></script>
+<script src="{{asset('js/bootstrap.min.js')}}"></script>
+<script src="{{asset('js/plugins/iCheck/icheck.min.js')}}"></script>
+
 <script>
-    $(function () {
-        $('input').iCheck({
-            checkboxClass: 'icheckbox_square-blue',
-            radioClass: 'iradio_square-blue',
-            increaseArea: '20%' // optional
+    $(document).ready(function(){
+        $('.icheck').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
         });
     });
 </script>
+
 </body>
+
 </html>
