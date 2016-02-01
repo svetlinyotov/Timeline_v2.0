@@ -5086,7 +5086,7 @@ dd.project-people {
 }
 .client-detail {
   position: relative;
-  height: 620px;
+  /*height: 620px;*/
 }
 .clients-list table tr td {
   height: 46px;
