@@ -188,72 +188,167 @@
 @stop
 
 @section('body')
-    <div class="box">
-        <div class="box-body">
-            @if(Session::has('message') || isset($_GET['message']))
-                <div class="alert alert-success alert-dismissable">
-                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button"><i class="fa fa-times"></i></button>
-                    <i class="fa fa-check"></i> {!! Session::get('message') !!} {!! $_GET['message']??"" !!}
-                </div>
-            @endif
 
-            <table id="data" class="table table-bordered table-striped">
+    @if(Session::has('message') || isset($_GET['message']))
+        <div class="alert alert-success alert-dismissable">
+            <button aria-hidden="true" data-dismiss="alert" class="close" type="button"><i class="fa fa-times"></i></button>
+            <i class="fa fa-check"></i> {!! Session::get('message') !!} {!! $_GET['message']??"" !!}
+        </div>
+    @endif
+
+    <div class="row">
+        <div class="col-lg-9">
+            <table id="data" class="table table-striped table-hover">
                 <thead>
                 <tr>
+                    <th></th>
                     <th>Name</th>
-                    <th>Email</th>
-                    <th>Mobile</th>
-                    @if(Auth::user()->role == "supadmin") <th>Company</th> @endif
+                    <th><span class="contact-type"><i class="fa fa-envelope"></i></span></th>
+                    <th><span class="contact-type"><i class="fa fa-phone"></i></span></th>
                     <th>Type</th>
+                    @if(Auth::user()->role == "supadmin") <th>Company</th> @endif
                     <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 @foreach($data as $user)
                     <tr>
-                        <td>{{$user->info->names}}</td>
+                        <td class="client-avatar"><a href=""><img alt="image" src="{{asset('avatar/'.$user->info->avatar)}}"></a> </td>
+                        <td><a data-toggle="tab" href="#contact-{{$user->id}}" class="client-link">{{$user->info->names}}</a></td>
                         <td>{{$user->email}}</td>
                         <td>{{$user->info->mobile}}</td>
-                        @if(Auth::user()->role == "supadmin")
-                        <td>
-                            <?php $i = 0; $len = count($user->company->toArray()); ?>
-                            @if($user->role == "worker")
-                                @foreach($user->company->toArray() as $company)
-                                    <a href="#" data-company="{{$company['name']}}" data-name="{{$user->info->names}} ({{$user->email}})" data-href="{{asset('/users/'.$user->id.'/unlink/'.$company['id'])}}" data-toggle="tooltip" data-placement="bottom" title="Unlink this company" class="btn-unlink-company">
-                                        {{$company['name']}}
-                                    </a>{{++$i != $len ? " | " : ""}}
-                                @endforeach
-                            @else
-                                {{$user->company->pluck('name')->first()}}
-                            @endif
-                        </td>
-                        @endif
                         <td>{{$user->role}}</td>
                         <td>
-                            <a href="{{asset('users/'.$user->id)}}" class="btn btn-info btn-xs" data-toggle="tooltip" data-placement="bottom" title="View profile"><i class="fa fa-eye"></i> | <i class="fa fa-calendar"></i> </a>
-                            @if($user->role == "worker")
-                                <a href="{{asset('users/'.$user->id.'/edit/link?rel=list')}}" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Link company"><i class="fa fa-link"></i></a>
-                            @endif
-                            <a href="{{asset('users/'.$user->id.'/edit?rel=list')}}" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit profile"><i class="fa fa-pencil"></i></a>
-                            @if(Auth::user()->role != "mod")
-                                @if(Auth::user()->role == "supadmin" && $len > 0 && $user->role == "worker")
-                                    <button type="button" data-href="{{asset('users/'.$user->id.'/unlink')}}"
-                                            data-toggle="tooltip" data-placement="bottom" title="Unlink from all companies"
-                                            data-name="{{$user->info->names}} ({{$user->email}})" class="btn btn-danger btn-xs btn-unlink-all">
-                                        <i class="fa fa-unlink"></i></button>
-                                @endif
-                                @if((Auth::user()->role == "admin" && $len == 1) || Auth::user()->role == "supadmin")
-                                <button type="button" data-href="{{asset('users/'.$user->id)}}"
-                                        data-toggle="tooltip" data-placement="bottom" title="Delete user"
-                                        data-name="{{$user->info->names}} ({{$user->email}})" class="btn btn-danger btn-xs btn-delete-alert">
-                                    <i class="fa fa-trash"></i></button>
+                            @if(Auth::user()->role == "supadmin")
+                                <?php $i = 0; $len = count($user->company->toArray()); ?>
+                                @if($user->role == "worker")
+                                    @foreach($user->company->toArray() as $company)
+                                        <a href="#" data-company="{{$company['name']}}" data-name="{{$user->info->names}} ({{$user->email}})" data-href="{{asset('/users/'.$user->id.'/unlink/'.$company['id'])}}" data-toggle="tooltip" data-placement="bottom" title="Unlink this company" class="btn-unlink-company">
+                                            {{$company['name']}}
+                                        </a>{!! ++$i != $len ? " <hr style='margin:0'> " : "" !!}
+                                    @endforeach
+                                @else
+                                    {{$user->company->pluck('name')->first()}}
                                 @endif
                             @endif
                         </td>
+                        <td class="client-status">
+                            <div class="m-t-xs btn-group">
+                                <a href="{{asset('users/'.$user->id)}}" class="btn btn-info btn-xs" data-toggle="tooltip" data-placement="bottom" title="View profile"><i class="fa fa-eye"></i> | <i class="fa fa-calendar"></i> </a>
+                                @if($user->role == "worker")
+                                    <a href="{{asset('users/'.$user->id.'/edit/link?rel=list')}}" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Link company"><i class="fa fa-link"></i></a>
+                                @endif
+                                <a href="{{asset('users/'.$user->id.'/edit?rel=list')}}" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit profile"><i class="fa fa-pencil"></i></a>
+                                @if(Auth::user()->role != "mod")
+                                    @if(Auth::user()->role == "supadmin" && $len > 0 && $user->role == "worker")
+                                        <button type="button" data-href="{{asset('users/'.$user->id.'/unlink')}}"
+                                                data-toggle="tooltip" data-placement="bottom" title="Unlink from all companies"
+                                                data-name="{{$user->info->names}} ({{$user->email}})" class="btn btn-danger btn-xs btn-unlink-all">
+                                            <i class="fa fa-unlink"></i></button>
+                                    @endif
+                                    @if((Auth::user()->role == "admin" && $len == 1) || Auth::user()->role == "supadmin")
+                                        <button type="button" data-href="{{asset('users/'.$user->id)}}"
+                                                data-toggle="tooltip" data-placement="bottom" title="Delete user"
+                                                data-name="{{$user->info->names}} ({{$user->email}})" class="btn btn-danger btn-xs btn-delete-alert">
+                                            <i class="fa fa-trash"></i></button>
+                                    @endif
+                                @endif
+                            </div>
+                        </td>
+
                     </tr>
                 @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="ibox ">
+                <div class="ibox-content">
+                    <div class="tab-content">
+                        <?php $i=0;?>
+                        @foreach($data as $user)
+                        <div id="contact-{{$user->id}}" class="tab-pane {{$i++==0?"active":""}}">
+                            <div class="row m-b-lg">
+                                <div class="col-lg-12 text-center">
+                                    <h2>{{$user->info->names}}</h2>
+
+                                    <div class="m-b-sm">
+                                        <img alt="image" class="img-circle" src="{{asset('avatar/'.$user->info->avatar)}}"
+                                             style="width: 62px">
+                                    </div>
+
+                                    <strong>
+
+                                    </strong>
+
+                                    <p>
+
+                                    </p>
+                                    <button type="button" class="btn btn-primary btn-sm btn-block"><i
+                                                class="fa fa-envelope"></i> Send Message
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="client-detail">
+
+                                    <strong>Details</strong>
+
+                                    <ul class="list-group clear-list">
+
+                                        <li class="list-group-item">
+                                            <strong><i class="fa fa-map-marker margin-r-5"></i> Address</strong>
+                                            <span class="text-muted pull-right" style="width:60%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis" title="{{$user->info->address}}">{{$user->info->address}}</span>
+                                        </li>
+
+                                        @if($user->info->birth_date)
+                                            <li class="list-group-item">
+                                                <strong><i class="fa fa-calendar margin-r-5"></i> Birth date</strong>
+                                                <span class="text-muted pull-right">{{$user->info->birth_date}}</span>
+                                            </li>
+                                        @endif
+
+                                        <li class="list-group-item">
+                                            <strong><i class="fa fa-mobile margin-r-5"></i> Mobile</strong>
+                                            <span class="text-muted pull-right">{{$user->info->mobile}}</span>
+                                        </li>
+
+
+                                        @if($user->info->home_phone)
+                                            <li class="list-group-item">
+                                                <strong><i class="glyphicon glyphicon-phone-alt margin-r-5"></i> Home phone</strong>
+                                                <span class="text-muted pull-right">{{$user->info->home_phone}}</span>
+                                            </li>
+                                        @endif
+
+                                        @if($user->info->work_phone)
+                                            <li class="list-group-item">
+                                                <strong><i class="fa fa-phone margin-r-5"></i> Work phone</strong>
+                                                <span class="text-muted pull-right">{{$user->info->work_phone}}</span>
+                                            </li>
+                                        @endif
+
+                                        @if($user->info->fax)
+                                            <li class="list-group-item">
+                                                <strong><i class="fa fa-fax margin-r-5"></i> Fax</strong>
+                                                <span class="text-muted pull-right">{{$user->info->fax}}</span>
+                                            </li>
+                                        @endif
+                                    </ul>
+                                    @if($user->info->other)
+                                    <strong>Other</strong>
+                                    <p>
+                                        {{$user->info->other}}
+                                    </p>
+                                    @endif
+
+                                </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

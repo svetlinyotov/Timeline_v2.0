@@ -1,7 +1,6 @@
 @extends('layouts.master')
 
 @section('style')
-    <link rel="stylesheet" href="{{asset("plugins/daterangepicker/daterangepicker.css")}}">
     <style>hr{margin:10px 0} .top-warning{border-top-color:#f39c12 !important;} </style>
 @stop
 
@@ -9,29 +8,8 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp&sensor=true"></script>
     <script src="{{asset("js/mapAddUser.js")}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
-    <script src="{{asset("plugins/daterangepicker/daterangepicker.js")}}"></script>
     <script>
-        $(function () {
 
-            $('.dateinput').daterangepicker({
-                timePicker: false,
-                autoUpdateInput:false,
-                maxDate: new Date(new Date().setDate(new Date().getDate()-1)),
-                singleDatePicker: true,
-                showDropdowns: true,
-                autoApply:true,
-                locale: {
-                    format: 'MM/DD/YYYY',
-                    cancelLabel: 'Clear'
-                }
-            }).on('apply.daterangepicker', function(ev, picker) {
-                $(this).val(picker.startDate.format('MM/DD/YYYY'));
-            }).on('cancel.daterangepicker', function(ev, picker) {
-                $(this).val('');
-            });
-
-
-        });
         window.onload = function() {
             var timer;
             document.getElementById("address_input").onkeyup=function(){
@@ -87,7 +65,7 @@
                         </h2>
                         <h4>{{$user->role}}</h4>
                         <small>
-                            Companies: //TODO
+                            <strong>Companies:</strong> {{implode(", ",$user->company->pluck('name')->toArray())}}
                         </small>
                     </div>
                 </div>
@@ -98,17 +76,17 @@
                 <tbody>
                 <tr>
                     <td>
-                        Rosters count last month <strong>0</strong>
+                        Rosters count last month <strong class="pull-right">0</strong>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        Working time last  <strong>0</strong>
+                        Working time last  <strong class="pull-right">0</strong>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        Amount earned last month <strong>0</strong>
+                        Amount earned last month <strong class="pull-right">0</strong>
                     </td>
                 </tr>
                 </tbody>
@@ -130,11 +108,6 @@
                 <div class="ibox-content">
                     <h3>About {{$user->info->names}}</h3>
                     <hr>
-                    <strong><i class="fa fa-building margin-r-5"></i>  Company</strong>
-                    <p class="text-muted">
-                        {{$user->company != null ? $user->company->name:''}}
-                    </p>
-
 
                     <strong><i class="fa fa-map-marker margin-r-5"></i> Address</strong>
                     <p class="text-muted">{{$user->info->address}}</p>

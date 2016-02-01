@@ -7,7 +7,7 @@
 
 @section('script')
     <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp&sensor=true"></script>
+            src="https://maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp"></script>
     <script src="{{asset("js/plugins/fileinput/fileinput.js")}}"></script>
     <script src="{{asset("js/mapAddUser.js")}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
