@@ -33,6 +33,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('payments/user/{user_id}/shifts', 'PaymentsController@update');
     });
     Route::resource('users', 'UsersController');
+    Route::delete('/users/{user_id}/unlink/{company_id}', 'UsersController@unlinkCompany');
+    Route::delete('/users/{user_id}/unlink', 'UsersController@unlinkAllCompanies');
+    Route::get('/users/{id}/edit/link', 'UsersController@linkCompanyFrom');
+    Route::put('/users/{id}/edit/link', 'UsersController@linkCompany');
+
     Route::get('/rosters', 'RostersController@index');
     Route::put('/rosters/{event_id}', 'RostersController@update');
     Route::get('/rosters/workers/{company_id}', 'RostersController@workers');
