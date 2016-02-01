@@ -85,7 +85,7 @@
     <div class="box">
         <div class="box-body">
             @if(Session::has('message'))
-                <div class="callout callout-success callout-sm">
+                <div class="alert alert-success callout-sm">
                     <i class="fa fa-check"></i> {!! Session::get('message') !!}
                 </div>
             @endif
@@ -95,52 +95,57 @@
                 </div>
             @endif
 
-            <form action="{{asset('users/'.$user->id)}}" method="post" enctype="multipart/form-data" class="col-md-6">
+            <form action="{{asset('users/'.$user->id)}}" method="post" enctype="multipart/form-data" >
                 {{csrf_field()}}
                 <input type="hidden" name="_method" value="put">
-                @if(Auth::user()->role == "supadmin")
-                <div class="form-group">
-                    <label>Company *</label>
-                    <div class="input-group">
-                        <div class="input-group-addon"><i class="fa fa-building"></i> </div>
-                        <select name="company" class="form-control">
-                            @if(Auth::user()->role == "supadmin")
-                                <option></option>
-                            @endif
-                            @foreach($companies as $company)
-                                <option value="{{$company->id}}" {{(old('company')??$user->company_id)==$company->id?'selected':null}}>{{$company->name}}</option>
-                            @endforeach
-                        </select>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Company</label>
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-building"></i> </div>
+                                <div class="form-control">{{implode(", ",$user->company->pluck('name')->toArray())}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon"><i class="fa fa-envelope"></i> </div>
+                                    <div class="form-control">{{$user->email}}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                @endif
-                <div class="form-group">
-                    <label>Email: {{$user->email}}</label>
-                </div>
-                <div class="form-group">
-                    <label>Password *</label>
-                    <div class="input-group @if($errors->first("password")) has-error @endif">
-                        <div class="input-group-addon"><i class="fa fa-key"></i> </div>
-                        <input type="text" name="password" class="form-control" value="{{old('password')}}">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Password <small>(enter to change the current one)</small></label>
+                            <div class="input-group @if($errors->first("password")) has-error @endif">
+                                <div class="input-group-addon"><i class="fa fa-key"></i> </div>
+                                <input type="text" name="password" class="form-control" value="{{old('password')}}">
+                            </div>
+                            {!! $errors->first('password', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
+                        </div>
                     </div>
-                    {!! $errors->first('password', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
-                </div>
-                @if(Auth::user()->role != "worker")
-                <div class="form-group">
-                    <label>Type *</label>
-                    <div class="input-group">
-                        <div class="input-group-addon"><i class="fa fa-list-alt"></i> </div>
-                        <select name="type" class="form-control">
-                            <option value="worker" {{(old('type')??$user->role)=="worker"?'selected':null}}>Worker</option>
-                            <option value="admin" {{(old('type')??$user->role)=="admin"?'selected':null}}>Admin</option>
-                            <option value="mod" {{(old('type')??$user->role)=="mod"?'selected':null}}>Moderator</option>
-                            @if(Auth::user()->role == "supadmin")
-                                <option value="supadmin" {{(old('type')??$user->role)=="supadmin"?'selected':null}}>Super admin</option>
-                            @endif
-                        </select>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon"><i class="fa fa-list-alt"></i> </div>
+                                    <div class="form-control">{{$user->role}}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                @endif
+
                 <div class="form-group">
                     <label>Names *</label>
                     <div class="input-group @if($errors->first("names")) has-error @endif">
