@@ -1,30 +1,43 @@
 @extends('layouts.master')
 
 @section('style')
-    <link rel="stylesheet" href="{{asset("plugins/datatables/dataTables.bootstrap.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/select2/select2.min.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/dataTables/datatables.min.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/select2/select2.min.css")}}">
 @stop
 
 @section('script')
-    <script src="{{asset("plugins/datatables/jquery.dataTables.min.js")}}"></script>
-    <script src="{{asset("plugins/datatables/dataTables.bootstrap.js")}}"></script>
-    <script src="{{asset("plugins/slimScroll/jquery.slimscroll.min.js")}}"></script>
-    <script src="{{asset("plugins/select2/select2.full.min.js")}}"></script>
+    <script src="{{asset("js/plugins/dataTables/datatables.min.js")}}"></script>
+    <script src="{{asset("js/plugins/select2/select2.full.min.js")}}"></script>
     <script>
         $(function () {
-            $(".timezone_input").select2();
+            $(".timezone_input1").select2({
+                placeholder: "Select"
+            });
+            $(".timezone_input2").select2({
+                placeholder: "Select"
+            });
 
             $("#data").DataTable({
+                dom: '<"html5buttons"B>lTfgitp',
                 columnDefs: [
                     {orderable: false, targets: -1}
                 ],
-                "paging": false,
-                "lengthChange": false,
-                "searching": false,
-                "ordering": true,
-                "info": false,
-                "autoWidth": true,
-                //"order": [[ 0, "desc" ]]
+                buttons: [
+                    { extend: 'copy', title: 'Users List'},
+                    {extend: 'csv', title: 'Users List'},
+                    {extend: 'excel', title: 'Users List'},
+                    {extend: 'pdf', title: 'Users List'},
+                    {extend: 'print',
+                        customize: function (win){
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+                            $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
             });
 
             $('#edit').on('show.bs.modal', function (e) {
@@ -76,7 +89,7 @@
     <div class="box">
         <div class="box-body">
             @if(Session::has('message'))
-                <div class="callout callout-success callout-sm">
+                <div class="alert alert-success">
                     <i class="fa fa-check"></i> {!! Session::get('message') !!}
                 </div>
             @endif
@@ -127,7 +140,7 @@
                     <h3 class="margin-0"><i class="fa fa-warning"></i> Warning</h3>
                 </div>
                 <div class="modal-body">
-                    Are you sure that you want to delete the company <span class="text-bold" id="name"></span>
+                    Are you sure that you want to delete the company <strong class="text-bold" id="name"></strong>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
@@ -174,7 +187,7 @@
                         </div>
                         <div class="form-group @if($errors->first('timezone')) has-error @endif">
                             <label for="timezone_input">Timezone</label>
-                            <select class="form-control timezone" id="timezone_input" name="timezone" style="width: 100%;">
+                            <select class="form-control timezone_input1" name="timezone" style="width: 100%;">
                                 @foreach($timezones as $timezone)
                                     <option value="{{$timezone}}"
                                             @if($timezone == old('timezone')) selected @endif>{{$timezone}}</option>
@@ -241,7 +254,7 @@
                         </div>
                         <div class="form-group @if($errors->first('timezone_edit')) has-error @endif">
                             <label for="timezone_input">Timezone</label>
-                            <select class="form-control timezone timezone_input" id="timezone_input" name="timezone_edit" style="width: 100%;">
+                            <select class="form-control timezone timezone_input2" name="timezone_edit" style="width: 100%;">
                                 @foreach($timezones as $timezone)
                                     <option value="{{$timezone}}"
                                             @if($timezone == old('timezone_edit')) selected @endif>{{$timezone}}</option>

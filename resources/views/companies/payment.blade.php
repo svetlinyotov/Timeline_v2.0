@@ -1,16 +1,14 @@
 @extends('layouts.master')
 
 @section('style')
-    <link rel="stylesheet" href="{{asset("plugins/datatables/dataTables.bootstrap.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/daterangepicker/daterangepicker.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/dataTables/datatables.min.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/daterangepicker/daterangepicker-bs3.css")}}">
 @stop
 
 @section('script')
-    <script src="{{asset("plugins/datatables/jquery.dataTables.min.js")}}"></script>
-    <script src="{{asset("plugins/datatables/dataTables.bootstrap.js")}}"></script>
-    <script src="{{asset("plugins/slimScroll/jquery.slimscroll.min.js")}}"></script>
+    <script src="{{asset("js/plugins/dataTables/datatables.min.js")}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
-    <script src="{{asset("plugins/daterangepicker/daterangepicker.js")}}"></script>
+    <script src="{{asset("js/plugins/daterangepicker/daterangepicker.js")}}"></script>
     <script>
         $(function () {
 
@@ -71,12 +69,12 @@
     <div class="box">
         <div class="box-body">
             @if(Session::has('message'))
-                <div class="callout callout-success callout-sm">
+                <div class="alert alert-success">
                     <i class="fa fa-check"></i> {!! Session::get('message') !!}
                 </div>
             @endif
             @if ($errors->any())
-                <div class='callout callout-danger callout-sm' role='alert'>
+                <div class='alert alert-danger' role='alert'>
                     <i class="fa fa-times"></i> You must enter only numeric data.
                 </div>
             @endif
@@ -139,14 +137,13 @@
         </div>
     </div>
 
-    <div class="box box-warning">
-        <div class="box-header with-border">
-            <h3 class="box-title">Custom Payment</h3>
+    <div class="ibox">
+        <div class="ibox-content">
+            <h3 class="ibox-title">Custom Payment
             <button type="button" class="btn btn-success btn-xs margin-left-20" data-toggle="modal" data-target="#add"><i class="fa fa-plus"></i> Add</button>
-        </div>
-        <div class="box-body">
+            </h3>
             @if(Session::has('custom_message'))
-                <div class="callout callout-success callout-sm">
+                <div class="alert alert-success callout-sm">
                     <i class="fa fa-check"></i> {!! Session::get('custom_message') !!}
                 </div>
             @endif
@@ -214,7 +211,7 @@
                     {{csrf_field()}}
                     <div class="modal-body">
                         @if ($errors->custom->any())
-                            <div class='callout callout-danger callout-sm' role='alert'>
+                            <div class='alert alert-danger callout-sm' role='alert'>
                                 <i class="fa fa-times"></i> You should fix the errors below.
                             </div>
                         @endif
