@@ -225,8 +225,8 @@ class CompaniesController extends Controller
     public function shiftsUpdate($company_id, Request $request)
     {
         $this->validate($request, [
-            'shift_day_start' => ['regex:/[0-9]{2}:[0-9]{2}\s(AM|PM)/'],
-            'shift_night_start' => ['regex:/[0-9]{2}:[0-9]{2}\s(AM|PM)/']
+            'shift_day_start' => ['regex:/[0-9]{2}:[0-9]{2}(AM|PM)/'],
+            'shift_night_start' => ['regex:/[0-9]{2}:[0-9]{2}(AM|PM)/']
         ]);
 
         $shift = Company::find($company_id);
