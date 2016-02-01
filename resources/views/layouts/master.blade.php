@@ -12,7 +12,10 @@
     <link href="{{asset('font-awesome/css/font-awesome.css')}}" rel="stylesheet">
     <link href="{{asset('css/animate.css')}}" rel="stylesheet">
     <link href="{{asset('css/style.css')}}" rel="stylesheet">
+    <link href="{{asset('css/pace.css')}}" rel="stylesheet">
+    <link href="{{asset('css/custom.css')}}" rel="stylesheet">
 
+    @yield('style')
 </head>
 
 <body class=" md-skin">
@@ -110,7 +113,7 @@
                             <li>
                                 <div class="dropdown-messages-box">
                                     <a href="profile.html" class="pull-left">
-                                        <img alt="image" class="img-circle" src="img/a7.jpg">
+                                        <img alt="image" class="img-circle" src="">
                                     </a>
                                     <div class="media-body">
                                         <small class="pull-right">46h ago</small>
@@ -188,12 +191,12 @@
             @yield('body')
 
         </div>
-        <div class="footer">
+        <div class="footer fixed">
             <div class="pull-right">
-                10GB of <strong>250GB</strong> Free.
+                Version: <strong>2.5</strong>
             </div>
             <div>
-                <strong>Copyright</strong> Example Company &copy; 2014-2015
+                <strong>Copyright</strong> <a href="snsdevelop.com">SnSDevelop</a> &copy; {{date("Y")}}
             </div>
         </div>
 
@@ -206,28 +209,24 @@
 <script src="{{asset('js/jquery-2.1.1.js')}}"></script>
 <script src="{{asset('js/bootstrap.js')}}"></script>
 <script src="{{asset('js/plugins/metisMenu/jquery.metisMenu.js')}}"></script>
-<script src="{{asset('js/plugins/slimscroll/jquery.slimscroll.min.js')}}"></script>
 
-<!-- Custom and plugin javascript -->
+<script src="{{asset("js/plugins/slimScroll/jquery.slimscroll.min.js")}}"></script>
+<script src="{{asset("js/plugins/niceScroll/jquery.nicescroll.js")}}"></script>
+
+
 <script src="{{asset('js/inspinia.js')}}"></script>
 <script src="{{asset('js/plugins/pace/pace.min.js')}}"></script>
 
-<!-- Sparkline -->
-<script src="{{asset('js/plugins/sparkline/jquery.sparkline.min.js')}}"></script>
-
+@yield('script')
 <script>
-    $(document).ready(function() {
-
-
-        $("#sparkline1").sparkline([34, 43, 43, 35, 44, 32, 44, 48], {
-            type: 'line',
-            width: '100%',
-            height: '50',
-            lineColor: '#1ab394',
-            fillColor: "transparent"
+    $(function () {
+        $('body').niceScroll({
+            autohidemode: 'false',
+            cursorborderradius: '10px',
+            background: '#E5E9E7',
+            cursorwidth: '10px',
+            cursorcolor: '#999999'
         });
-
-
     });
 </script>
 
