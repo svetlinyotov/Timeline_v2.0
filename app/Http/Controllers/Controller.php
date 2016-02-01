@@ -15,13 +15,23 @@ abstract class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    protected $company_id = null;
+
     public function __construct(Request $request)
     {
         $timezone = 'UTC';
-        if(Auth::user()->company != null) $timezone = Auth::user()->company->timezone;
+
+        if(Auth::user()->company != null) $timezone = "";//Auth::user()->company->timezone;
 
         if(Auth::check()) {
             Config::set('app.timezone', $timezone);
+
+            $this->company_id = Auth::user()->with(['company' => function($query)
+            {
+                $query->select('companies.id');
+
+            }])->first()->company->pluck("id")->toArray();
+
         }
 
         if($request->get('noti')) {

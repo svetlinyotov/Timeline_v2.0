@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -35,7 +36,11 @@ class UsersController extends Controller
     public function index()
     {
         if(Auth::user()->role == "supadmin")
-            $data = User::all();
+            $data = User::with(['company' => function($query)
+            {
+                $query->select('companies.id', 'name');
+
+            }])->get();
         else
             $data = User::where('company_id', Auth::user()->company_id)->get();
         return view('users.list')->with(['data' => $data]);
@@ -85,11 +90,13 @@ class UsersController extends Controller
 
         $password = Common::generateStrongPassword();
 
-        $user = new User();
         if(Auth::user()->role == "supadmin")
-            $user->company_id = $request->input('company');
+            $company_id = $request->input('company');
         else
-            $user->company_id = Auth::user()->company_id;
+            $company_id = Auth::user()->company_id;
+
+
+        $user = new User();
         $user->role = $request->input('type');
         $user->password = Hash::make($password);
         $user->email = $request->input('email');
@@ -111,9 +118,11 @@ class UsersController extends Controller
 
         $user->info()->save($info);
 
+        Company::find($company_id)->users()->attach($user->id);
+
         Notification::add($user->id, 'USER_ADD_BY_ADMIN', ['admin_id'=>Auth::user()->id]);
 
-        Mail::send('emails.newUserPassword', ['user' => $user, 'info' => $info, 'password' => $password, 'company' => Company::find($user->company_id)->pluck('name')], function ($m) use ($user) {
+        Mail::send('emails.newUserPassword', ['user' => $user, 'info' => $info, 'password' => $password, 'company' => Company::find($company_id)->pluck('name')], function ($m) use ($user) {
             $m->from('support@timeline.snsdevelop.com', 'TIMELINE');
 
             $m->to($user->email, $user->names)->subject('You have been added to TIMELINE');
@@ -229,13 +238,16 @@ class UsersController extends Controller
 
     public function destroy($id)
     {
-        if(Auth::user()->id == $id) return redirect()->back();
+        if(Auth::user()->id == $id) abort(200);
         $user = null;
 
         if(Auth::user()->role == "supadmin"){
             $user = User::find($id);
         }else if(Auth::user()->role == "admin"){
-            $user = User::where('company_id', Auth::user()->comapny_id);
+            $user = User::find($id);
+            if(!in_array($this->company_id[0], $user->with(['company' => function($query) {$query->select('companies.id');}])->first()->company->pluck("id")->toArray())){
+                abort(400);
+            }
         }else{
             abort(401);
         }
@@ -247,6 +259,64 @@ class UsersController extends Controller
 
         $user->delete();
 
-        return redirect()->back()->with(['message' => 'User is deleted successfully.']);
+        abort(200, "User is deleted successfully.");
+    }
+
+    public function unlinkCompany($user_id, $company_id){
+
+        if(Auth::user()->role == "supadmin"){
+            $user = User::find($user_id);
+        }else if(Auth::user()->role == "admin"){
+            $user = User::find($user_id);
+            if($this->company_id[0] != $company_id){
+                abort(400);
+            }
+        }else{
+            abort(401);
+        }
+
+        if($user->role != "worker") abort(400, "Not allowed");
+
+        $user->company()->detach($company_id);
+
+        abort(200, "All done");
+    }
+
+    public function unlinkAllCompanies($user_id){
+
+        if(Auth::user()->role == "supadmin"){
+            $user = User::find($user_id);
+        }else{
+            abort(401);
+        }
+        if($user->role != "worker") abort(400, "Not allowed");
+
+        $user->company()->detach();
+
+        abort(200, "All done");
+    }
+
+    public function linkCompanyFrom($id)
+    {
+        $companies = User::notLinkedCompanies($id);
+        $user = User::find($id);
+        if($user->role != "worker") abort(400, "Not allowed");
+
+        return view('users.link')->with(['user' => $user, 'companies' => $companies]);
+    }
+
+    public function linkCompany($id, Request $request)
+    {
+        if($request->input('company') != null) {
+            $company_ids = array_keys($request->input('company'));
+            $user = User::find($id);
+
+            if($user->role != "worker") abort(400, "Not allowed");
+
+            $user->company()->attach($company_ids);
+
+            return redirect('/users')->with(['message' => "User is linked successfully."]);
+        }
+        return redirect('/users');
     }
 }
