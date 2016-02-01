@@ -45,7 +45,7 @@ class User extends Model implements AuthenticatableContract,
 
     public function company()
     {
-        return $this->belongsTo('App\Company');
+        return $this->belongsToMany('App\Company');
     }
 
     public function rosters()
@@ -56,6 +56,19 @@ class User extends Model implements AuthenticatableContract,
     public function notifications()
     {
         return $this->hasMany('App\Notification');
+    }
+
+    public static function notLinkedCompanies($user_id)
+    {
+        return DB::select("
+            SELECT id, name
+            FROM companies
+            WHERE id NOT IN (
+                SELECT company_id
+                FROM company_user
+                WHERE user_id = ?
+            )
+        ", [$user_id]);
     }
 
     public static function events($user_id, $data)

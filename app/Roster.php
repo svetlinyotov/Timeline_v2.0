@@ -14,7 +14,7 @@ class Roster extends Model
 
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsToMany('App\User');
     }
 
     public function added_by_user()
