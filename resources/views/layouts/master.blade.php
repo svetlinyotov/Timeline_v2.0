@@ -227,9 +227,22 @@
             cursorwidth: '10px',
             cursorcolor: '#999999'
         });
+
+        if(window.location.hash) {
+            var hash = window.location.hash;
+            if($(hash).hasClass('modal')) {
+                $(hash).modal('toggle');
+            }
+
+            if (hash) {
+                $('.nav-tabs a[href='+hash+']').tab('show');
+            }
+            $('.nav-tabs a').on('shown.bs.tab', function (e) {
+                window.location.hash = e.target.hash;
+            });
+        }
     });
 </script>
-
 </body>
 
 </html>
