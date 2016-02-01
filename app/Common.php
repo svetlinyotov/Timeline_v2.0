@@ -34,7 +34,7 @@ class Common
 
     public static function formatTimeFromSQL($time) : string
     {
-        return date('h:i A', strtotime($time));
+        return date('h:iA', strtotime($time));
     }
 
     public static function formatTimeFromSQL24($time) : string
