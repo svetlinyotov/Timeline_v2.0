@@ -152,8 +152,6 @@ class UsersController extends Controller
 
     public function update(Request $request, $id = null)
     {
-        if(Auth::user()->role != "supadmin" && $request->input('type') == "supadmin") abort(401);
-
         if($id == null) $id = Auth::user()->id;
 
         $rules = [
@@ -166,10 +164,6 @@ class UsersController extends Controller
             'avatar' => 'image|mimes:jpg,jpeg,bmp,png,gif,tiff',
             'cv' => 'mimes:doc,docx,ppt,pps,pptx,ppsx,xls,xlsx',
         ];
-
-        if(Auth::user()->role == "supadmin") $rules['company'] = 'required';
-        if( $request->input('type') == "supadmin") $rules['company'] = '';
-        if(Auth::user()->role != "worker") $rules['type'] = 'required';
 
         $this->validate($request, $rules);
 
@@ -190,10 +184,7 @@ class UsersController extends Controller
         }
 
         $user = User::find($id);
-        if(Auth::user()->role == "supadmin")
-            $user->company_id = $request->has('company') ? $request->input('company') : null;
-        if(Auth::user()->role != "worker")
-            $user->role = $request->input('type');
+
         if($request->input('password') != null)
             $user->password = Hash::make($request->input('password'));
         $user->save();
