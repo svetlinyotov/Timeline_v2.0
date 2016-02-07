@@ -35,15 +35,22 @@ class Notification extends Model
         return $count;
     }
 
-    public static function read($user_id, $unread = true)
+    public static function read($user_id, $unread = true, int $limit = 500, $paginate = false)
     {
         if($unread === true)
-            $notifications = Notification::where('user_id', $user_id)->where('is_read', 0)->orderBy('id', 'desc')->get();
+            $notifications = Notification::where('user_id', $user_id)->where('is_read', 0)->orderBy('id', 'desc');
         else
-            $notifications = Notification::where('user_id', $user_id)->orderBy('id', 'desc')->get();
-        $data = [];
+            $notifications = Notification::where('user_id', $user_id)->orderBy('id', 'desc');
 
-        foreach ($notifications as $notification) {
+        if(is_numeric($paginate) && $paginate > 0) $notifications = $notifications->paginate($paginate); else $notifications = $notifications->limit($limit)->get();
+
+        return $notifications;
+    }
+
+    public static function format($obj)
+    {
+        $data = [];
+        foreach ($obj as $notification) {
             $text = "";
             $link = "";
             $icon = "";

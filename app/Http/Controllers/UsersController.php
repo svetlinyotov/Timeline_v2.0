@@ -145,9 +145,22 @@ class UsersController extends Controller
         if($id == null) $id = Auth::user()->id;
         $user = User::find($id);
         $notification_count = Notification::count($id);
-        $notification_list = Notification::read($id, false);
+        $notification_obj = Notification::read($id, true, 6);
+        $notification_list = Notification::format($notification_obj);
 
         return view('users.view')->with(['user' => $user, 'notification_count' => $notification_count, 'notification_list' => $notification_list]);
+    }
+
+    public function showAllNotifications($id = null)
+    {
+        if($id == null) $id = Auth::user()->id;
+
+        $notification_count = Notification::count($id);
+        $notification_obj = Notification::read($id, false, 1000, 12);
+        $notifications = Notification::format($notification_obj);
+        $user = User::with('info')->where('id', $id)->first();
+
+        return view('users.notifications')->with(['notifications' => $notifications, 'notifications_obj'=>$notification_obj, 'notification_count' => $notification_count, 'user'=>$user]);
     }
 
     public function edit($id = null)
@@ -233,8 +246,8 @@ class UsersController extends Controller
             return redirect('/users/' . $id)->with(['message' => "User was updated successfully. The new password was sent to his/her email ({$user->email})."]);
         }
 
-        if(Auth::user()->role == "worker")
-            return redirect('/profile/')->with(['message' => "User was updated successfully."]);
+        if(Auth::user()->role == "worker" || $id == Auth::user()->id)
+            return redirect('/profile/')->with(['message' => "Data was updated successfully."]);
 
         return redirect('/users/' . $id)->with(['message' => "User was updated successfully."]);
 
@@ -331,7 +344,7 @@ class UsersController extends Controller
     public function linkUser($company_id, Requests\LinkUserToCompanyRequest $request)
     {
         $email = $request->input("email");
-        $user = User::where('email', $email)->get();
+        $user = User::where('email', $email)->first();
         $if_user_already_linked = (bool)User::with(['company' => function($query)
         {
             $query->select('companies.id');
@@ -339,9 +352,11 @@ class UsersController extends Controller
         }])->whereHas('company', function ($q) use ($company_id) {
             $q->where('companies.id', '=', $company_id);
         })->where('users.email', '=', $email)->count();
+        $if_admin = (bool)User::where('users.role', '!=', 'worker')->where('users.email', '=', $email)->count();
 
         if($email == Auth::user()->email) return redirect('/users#link_user')->withErrors(["You cannot link yourself."])->withInput(['email'=>$email]);
         if($if_user_already_linked) return redirect('/users#link_user')->withErrors(["$email is already linked to your company"])->withInput(['email'=>$email]);
+        if($if_admin) return redirect('/users#link_user')->withErrors(["You are not allowed to link $email"])->withInput(['email'=>$email]);
 
         if(count($user) != 1){
             return redirect('/users/create?email='.$email)->with(['info' => "User $email does not exists in our records. You have to create new one."]);
