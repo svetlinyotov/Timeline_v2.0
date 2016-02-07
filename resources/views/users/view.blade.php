@@ -23,23 +23,24 @@
 @stop
 
 @section('title')
-    <h2>
+    <h1>
 
-        @if(Request::segment(1) != 'profile')<a href="@if(isset($_GET['rel']) && $_GET['rel'] == "payment"){{asset("payments?company_id=".$user->company_id)}} @else {{asset("users")}} @endif" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
-        Users - {{$user->info->names}}
+        @if(Request::segment(1) != 'profile')
+            <a href="@if(isset($_GET['rel']) && $_GET['rel'] == "payment"){{asset("payments?company_id=".$user->company_id)}} @else {{asset("users")}} @endif" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
+            {{$user->info->names}}
         <small>view</small>
         @else
             Profile
         @endif
 
-    </h2>
+    </h1>
     <ol class="breadcrumb">
         <li><a href="{{asset("dashboard")}}"><i class="fa fa-user"></i> Home</a></li>
         @if(Request::segment(1) != 'profile')
             <li><a href="{{asset("users")}}">Users</a></li>
             <li>{{$user->info->names}}</li>
         @else
-            <li>{{$user->info->names}}</li>
+            <li>Profile</li>
         @endif
     </ol>
 @stop
@@ -104,6 +105,7 @@
 
         <div class="col-lg-3">
 
+            <a href="@if(Request::segment(1) != 'profile'){{asset('/users/'.$user->id.'/edit')}}@else{{asset('/profile/edit')}}@endif" class="btn btn-primary btn-block"><i class="fa fa-edit"></i> Edit</a><br>
             <div class="ibox">
                 <div class="ibox-content">
                     <h3>About {{$user->info->names}}</h3>
@@ -179,7 +181,7 @@
 
             <div class="ibox">
                 <div class="ibox-content">
-                    <h3>Notifications <small>(unseen)</small> </h3>
+                    <h3><a href="@if(Request::segment(1) != 'profile'){{asset('/users/'.$user->id.'/notifications')}}@else{{asset('/profile/notifications')}}@endif">Notifications <small>(unseen)</small></a></h3>
 
                     <div class="list-group">
                         @foreach($notification_list as $notification)
@@ -188,6 +190,9 @@
                                 <small class="pull-right">{{$notification['date']}}</small>
                             </a>
                         @endforeach
+                        <a href="@if(Request::segment(1) != 'profile'){{asset('/users/'.$user->id.'/notifications')}}@else{{asset('/profile/notifications')}}@endif" class="list-group-item list-group-item-info text-center">
+                            <h3>See All</h3>
+                        </a>
                     </div>
                 </div>
             </div>

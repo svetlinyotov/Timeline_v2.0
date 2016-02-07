@@ -34,7 +34,7 @@
                              </span> <span class="text-muted text-xs block">{{Auth::user()->role}} <b class="caret"></b></span> </span> </a>
                         <ul class="dropdown-menu animated fadeInRight m-t-xs">
                             <li><a href="{{asset('profile')}}">Profile</a></li>
-                            <li><a href="#">Notifications</a></li>
+                            <li><a href="{{asset('profile/notifications')}}">Notifications</a></li>
                             <li><a href="#">Messages</a></li>
                             <li class="divider"></li>
                             <li><a href="{{asset('logout')}}">Logout</a></li>
@@ -157,7 +157,7 @@
 
                             <li>
                                 <div class="text-center link-block">
-                                    <a href="#">
+                                    <a href="{{asset('profile/notifications')}}">
                                         <strong>See All</strong>
                                         <i class="fa fa-angle-right"></i>
                                     </a>

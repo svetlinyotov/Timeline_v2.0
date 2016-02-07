@@ -124,7 +124,7 @@
                             <label class="control-label">Email *</label>
                             <div class="input-group @if($errors->first("email")) has-error @endif has-feedback">
                                 <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
-                                <input type="email" name="email" class="form-control" value="{{old('email')??$_GET['email']}}">
+                                <input type="email" name="email" class="form-control" value="{{old('email')??$_GET['email']??""}}">
                             </div>
                             {!! $errors->first('email', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>

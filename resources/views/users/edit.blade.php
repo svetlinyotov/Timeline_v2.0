@@ -47,14 +47,23 @@
 
 @section('title')
     <h1>
-        <a href="{!! (isset($_GET['rel']) && $_GET['rel'] == 'edit') ? asset('users/'.$user->id) : asset('users') !!}" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
-        Users - {{$user->info->names}}
-        <small>edit</small>
+        @if(Request::segment(1) != 'profile')
+            <a href="{!! (isset($_GET['rel']) && $_GET['rel'] == 'edit') ? asset('users/'.$user->id) : asset('users') !!}" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
+            {{$user->info->names}}
+            <small>edit</small>
+        @else
+            <a href="{{asset('profile')}}" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
+            Edit
+        @endif
     </h1>
     <ol class="breadcrumb">
-        <li><a href="{{asset("dashboard")}}"><i class="fa fa-users"></i> Home</a></li>
-        <li><a href="{{asset("users")}}">Users</a></li>
-        <li><a href="{{asset("users/".$user->id)}}">{{$user->info->names}}</a></li>
+        <li><a href="{{asset("dashboard")}}"><i class="fa fa-pencil"></i> Home</a></li>
+        @if(Request::segment(1) != 'profile')
+            <li><a href="{{asset("users")}}">Users</a></li>
+            <li><a href="{{asset("users/".$user->id)}}">{{$user->info->names}}</a></li>
+        @else
+            <li>Profile</li>
+        @endif
         <li class="active">Edit</li>
     </ol>
 @stop
