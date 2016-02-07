@@ -14,6 +14,8 @@ Route::get('ajax/timezone', 'CommonController@timezone');
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('profile', 'UsersController@show');
+    Route::get('profile/edit', 'UsersController@edit');
+    Route::get('profile/notifications', 'UsersController@showAllNotifications');
 
     Route::group(['middleware' => 'auth.supadmin'], function () {
         Route::get('/companies/{company_id}/shifts', 'CompaniesController@shiftsShow');
@@ -31,8 +33,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('payments', 'PaymentsController@index');
         Route::get('payments/user/{user_id}/shifts', 'PaymentsController@edit');
         Route::put('payments/user/{user_id}/shifts', 'PaymentsController@update');
+        Route::put('/companies/{company_id}/link', 'UsersController@linkUser');
     });
     Route::resource('users', 'UsersController');
+    Route::get('/users/{user_id}/notifications', 'UsersController@showAllNotifications');
     Route::delete('/users/{user_id}/unlink/{company_id}', 'UsersController@unlinkCompany');
     Route::delete('/users/{user_id}/unlink', 'UsersController@unlinkAllCompanies');
     Route::get('/users/{id}/edit/link', 'UsersController@linkCompanyFrom');
