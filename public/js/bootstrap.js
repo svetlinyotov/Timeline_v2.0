@@ -210,7 +210,7 @@ if (typeof jQuery === 'undefined') {
 
     // push to event loop to allow forms to submit
     setTimeout($.proxy(function () {
-      $el[val](data[state] == null ? this.options[state] : data[state])
+      $el[val](data[state] == null ? this.options[state] : "<i class='fa  fa-spinner fa-pulse'></i> "+data[state])
 
       if (state == 'loadingText') {
         this.isLoading = true
