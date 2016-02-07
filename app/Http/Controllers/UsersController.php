@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
 
 class UsersController extends Controller
 {
+
     public function __construct(Request $request)
     {
         parent::__construct($request);
@@ -35,6 +36,8 @@ class UsersController extends Controller
 
     public function index()
     {
+        $company_id = $this->company_id;
+
         if(Auth::user()->role == "supadmin")
             $data = User::with(['company' => function($query)
             {
@@ -42,7 +45,13 @@ class UsersController extends Controller
 
             }])->get();
         else
-            $data = User::where('company_id', Auth::user()->company_id)->get();
+            $data = User::with(['company' => function($query)
+            {
+                $query->select('companies.id', 'name');
+
+            }])->whereHas('company', function ($q) use ($company_id) {
+                $q->where('companies.id', '=', $company_id);
+            })->get();
         return view('users.list')->with(['data' => $data]);
     }
 
@@ -93,8 +102,7 @@ class UsersController extends Controller
         if(Auth::user()->role == "supadmin")
             $company_id = $request->input('company');
         else
-            $company_id = Auth::user()->company_id;
-
+            $company_id = $this->company_id[0];
 
         $user = new User();
         $user->role = $request->input('type');
@@ -211,7 +219,12 @@ class UsersController extends Controller
             Notification::add($id, 'USER_UPDATE_BY_ADMIN', ['admin_id'=>Auth::user()->id]);
 
         if($request->input('password') != null) {
-            Mail::send('emails.editUserPassword', ['user' => $user, 'info' => $info, 'password' => $request->input('password'), 'company' => Company::find($user->company_id)->pluck('name')], function ($m) use ($user) {
+            Mail::send('emails.editUserPassword', [
+                'user' => $user,
+                'info' => $info,
+                'password' => $request->input('password'),
+                'company' => implode(', ', User::find($id)->company->pluck('name')->toArray())
+            ], function ($m) use ($user) {
                 $m->from('support@timeline.snsdevelop.com', 'TIMELINE');
 
                 $m->to($user->email, $user->names)->subject('Your account on TIMELINE platform was edited');
@@ -299,7 +312,11 @@ class UsersController extends Controller
     public function linkCompany($id, Request $request)
     {
         if($request->input('company') != null) {
-            $company_ids = array_keys($request->input('company'));
+            if(is_array($request->input('company'))) {
+                $company_ids = array_keys($request->input('company'));
+            }else{
+                $company_ids = $request->input('company');
+            }
             $user = User::find($id);
 
             if($user->role != "worker") abort(400, "Not allowed");
@@ -309,5 +326,28 @@ class UsersController extends Controller
             return redirect('/users')->with(['message' => "User is linked successfully."]);
         }
         return redirect('/users');
+    }
+
+    public function linkUser($company_id, Requests\LinkUserToCompanyRequest $request)
+    {
+        $email = $request->input("email");
+        $user = User::where('email', $email)->get();
+        $if_user_already_linked = (bool)User::with(['company' => function($query)
+        {
+            $query->select('companies.id');
+
+        }])->whereHas('company', function ($q) use ($company_id) {
+            $q->where('companies.id', '=', $company_id);
+        })->where('users.email', '=', $email)->count();
+
+        if($email == Auth::user()->email) return redirect('/users#link_user')->withErrors(["You cannot link yourself."])->withInput(['email'=>$email]);
+        if($if_user_already_linked) return redirect('/users#link_user')->withErrors(["$email is already linked to your company"])->withInput(['email'=>$email]);
+
+        if(count($user) != 1){
+            return redirect('/users/create?email='.$email)->with(['info' => "User $email does not exists in our records. You have to create new one."]);
+        }
+
+        $user->company()->attach($company_id);
+        return redirect('/users')->with(['message' => "User $email is linked successfully."]);
     }
 }

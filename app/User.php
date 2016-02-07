@@ -50,7 +50,7 @@ class User extends Model implements AuthenticatableContract,
 
     public function rosters()
     {
-        return $this->hasMany('App\Roster');
+        return $this->belongsToMany('App\Roster');
     }
 
     public function notifications()
@@ -73,8 +73,10 @@ class User extends Model implements AuthenticatableContract,
 
     public static function events($user_id, $data)
     {
-        return User::find($user_id)->join('rosters', 'rosters.user_id', '=', 'users.id')->select(DB::raw("rosters.id as id,
-          rosters.user_id as resourceId,
+        return DB::select("
+          SELECT
+          rosters.id as id,
+          ru.user_id as resourceId,
           rosters.start_time as start,
           rosters.end_time as end,
           rosters.name as title,
@@ -89,6 +91,15 @@ class User extends Model implements AuthenticatableContract,
               WHEN rosters.status = 'accepted' THEN 'color-green'
               WHEN rosters.status = 'declined' THEN 'color-red'
               WHEN rosters.status = 'canceled' THEN 'color-white'
-          END as className"))->get();
+          END as className
+          FROM rosters
+          left JOIN roster_user ru ON ru.roster_id = rosters.id
+          LEFT JOIN users ON users.id = ru.user_id
+          LEFT JOIN company_user cu ON cu.user_id = users.id
+          LEFT JOIN companies c ON cu.company_id = c.id
+          WHERE
+            cu.user_id = ?
+            AND (start_time BETWEEN ? and ? OR end_time BETWEEN ? and ?)
+          ", [$user_id, $data['start'], $data['end'], $data['start'], $data['end']]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Notification;
+use App\User;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -26,7 +27,7 @@ abstract class Controller extends BaseController
         if(Auth::check()) {
             Config::set('app.timezone', $timezone);
 
-            $this->company_id = Auth::user()->with(['company' => function($query)
+            $this->company_id = User::where('id',Auth::user()->id)->with(['company' => function($query)
             {
                 $query->select('companies.id');
 
