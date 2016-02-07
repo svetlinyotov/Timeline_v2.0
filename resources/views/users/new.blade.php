@@ -71,8 +71,13 @@
     <div class="box">
         <div class="box-body">
             @if(Session::has('message'))
-                <div class="callout callout-success callout-sm">
+                <div class="alert alert-success">
                     <i class="fa fa-check"></i> {!! Session::get('message') !!}
+                </div>
+            @endif
+            @if(Session::has('info'))
+                <div class="alert alert-info">
+                    <i class="fa fa-info"></i> {!! Session::get('info') !!}
                 </div>
             @endif
 
@@ -119,7 +124,7 @@
                             <label class="control-label">Email *</label>
                             <div class="input-group @if($errors->first("email")) has-error @endif has-feedback">
                                 <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
-                                <input type="email" name="email" class="form-control" value="{{old('email')}}">
+                                <input type="email" name="email" class="form-control" value="{{old('email')??$_GET['email']}}">
                             </div>
                             {!! $errors->first('email', "<span class='text-danger'><i class='fa fa-times-circle-o'></i>:message</span>") !!}
                         </div>

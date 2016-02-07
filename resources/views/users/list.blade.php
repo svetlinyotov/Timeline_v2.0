@@ -77,14 +77,14 @@
                     });
                 });
 
-                @if(Auth::user()->role == "supadmin")
+                @if(Auth::user()->role != "mod")
                     $('.btn-unlink-company').click(function (e) {
                         var company = $(this).data('company');
                         var href = $(this).data('href');
                         var name = $(this).data('name');
 
                         swal({
-                            title: "Are you sure you want to unlink " + company + " from " + name + "?",
+                            title: "Are you sure you want to unlink " + name + " from " + company + "?",
                             text: "You can add it later again meanwhile the user will not be able to access the data from the specified company!",
                             type: "warning",
                             showCancelButton: true,
@@ -102,7 +102,7 @@
                                         data: {"_token":"{{csrf_token()}}"},
                                         success: function(result) {
                                             setTimeout(function () {
-                                                window.location = "{{asset('users')}}?message=Company "+company+" is successfully unlinked from "+name+"";
+                                                window.location = "{{asset('users')}}?message=User "+name+" is successfully unlinked from "+company+"";
                                             }, 1400);
                                             swal({
                                                 title:"Unlinked!",
@@ -212,30 +212,30 @@
                 </thead>
                 <tbody>
                 @foreach($data as $user)
+                    <?php $i = 0; $len = count($user->company->toArray()); ?>
                     <tr>
                         <td class="client-avatar"><a href=""><img alt="image" src="{{asset('avatar/'.$user->info->avatar)}}"></a> </td>
                         <td><a data-toggle="tab" href="#contact-{{$user->id}}" class="client-link">{{$user->info->names}}</a></td>
                         <td>{{$user->email}}</td>
                         <td>{{$user->info->mobile}}</td>
                         <td>{{$user->role}}</td>
+                        @if(Auth::user()->role == "supadmin")
                         <td>
-                            @if(Auth::user()->role == "supadmin")
-                                <?php $i = 0; $len = count($user->company->toArray()); ?>
-                                @if($user->role == "worker")
-                                    @foreach($user->company->toArray() as $company)
-                                        <a href="#" data-company="{{$company['name']}}" data-name="{{$user->info->names}} ({{$user->email}})" data-href="{{asset('/users/'.$user->id.'/unlink/'.$company['id'])}}" data-toggle="tooltip" data-placement="bottom" title="Unlink this company" class="btn-unlink-company">
-                                            {{$company['name']}}
-                                        </a>{!! ++$i != $len ? " <hr style='margin:0'> " : "" !!}
-                                    @endforeach
-                                @else
-                                    {{$user->company->pluck('name')->first()}}
-                                @endif
+                            @if($user->role == "worker")
+                                @foreach($user->company->toArray() as $company)
+                                    <a href="#" data-company="{{$company['name']}}" data-name="{{$user->info->names}} ({{$user->email}})" data-href="{{asset('/users/'.$user->id.'/unlink/'.$company['id'])}}" data-toggle="tooltip" data-placement="bottom" title="Unlink this company" class="btn-unlink-company">
+                                        {{$company['name']}}
+                                    </a>{!! ++$i != $len ? " <hr style='margin:0'> " : "" !!}
+                                @endforeach
+                            @else
+                                {{$user->company->pluck('name')->first()}}
                             @endif
                         </td>
+                        @endif
                         <td class="client-status">
                             <div class="m-t-xs btn-group">
                                 <a href="{{asset('users/'.$user->id)}}" class="btn btn-info btn-xs" data-toggle="tooltip" data-placement="bottom" title="View profile"><i class="fa fa-eye"></i> | <i class="fa fa-calendar"></i> </a>
-                                @if($user->role == "worker")
+                                @if($user->role == "worker" && Auth::user()->role == "supadmin")
                                     <a href="{{asset('users/'.$user->id.'/edit/link?rel=list')}}" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Link company"><i class="fa fa-link"></i></a>
                                 @endif
                                 <a href="{{asset('users/'.$user->id.'/edit?rel=list')}}" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit profile"><i class="fa fa-pencil"></i></a>
@@ -246,11 +246,16 @@
                                                 data-name="{{$user->info->names}} ({{$user->email}})" class="btn btn-danger btn-xs btn-unlink-all">
                                             <i class="fa fa-unlink"></i></button>
                                     @endif
-                                    @if((Auth::user()->role == "admin" && $len == 1) || Auth::user()->role == "supadmin")
+                                    @if(Auth::user()->role == "supadmin")
                                         <button type="button" data-href="{{asset('users/'.$user->id)}}"
                                                 data-toggle="tooltip" data-placement="bottom" title="Delete user"
                                                 data-name="{{$user->info->names}} ({{$user->email}})" class="btn btn-danger btn-xs btn-delete-alert">
                                             <i class="fa fa-trash"></i></button>
+                                    @endif
+                                    @if(Auth::user()->role == "admin" && $user->role == "worker")
+                                        <a href="#" data-company="{{$company_name}}" data-name="{{$user->info->names}} ({{$user->email}})" data-href="{{asset('/users/'.$user->id.'/unlink/'.$company_id)}}" data-toggle="tooltip" data-placement="bottom" title="Unlink user" class="btn btn-danger btn-xs btn-unlink-company">
+                                            <i class="fa fa-unlink"></i>
+                                        </a>
                                     @endif
                                 @endif
                             </div>
@@ -357,15 +362,30 @@
         <div class="modal-dialog modal-sm">
             <div class="modal-content panel-info">
                 <div class="modal-header panel-heading">
-                    <h3 class="margin-0"><i class="fa fa-warning"></i> Add user</h3>
+                    <h3 class="margin-0"><i class="fa fa-plus"></i> Add user</h3>
                 </div>
-                <div class="modal-body">
-                    Are you sure that you want to delete the user <span class="text-bold" id="name"></span>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-outline btn-ok" href="#" data-method="delete" data-token="{{ csrf_token() }}">Delete</a>
-                </div>
+                <form action="{{asset('/companies/'.$company_id.'/link')}}" method="post" role="form">
+                    {{csrf_field()}}
+                    <input type="hidden" name="_method" value="put">
+                    <div class="modal-body">
+                        <p>Enter the email of the user that you wish to add. If he/she exists one will be linked to your company, otherwise you will be prompted to create new one.</p>
+                        @if (count($errors) > 0)
+                            <div class="alert alert-danger">
+                                @foreach ($errors->all() as $error)
+                                    {{ $error }}<br>
+                                @endforeach
+                            </div>
+                        @endif
+                        <div class="form-group @if($errors->first('email')) has-error @endif">
+                            <label class="control-label" for="email">Email: </label>
+                            <input type="email" name="email" id="email" class="form-control" value="{{old("email")}}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-info btn-loading">Next ></button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

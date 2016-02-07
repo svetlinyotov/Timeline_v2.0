@@ -213,7 +213,6 @@
 <script src="{{asset("js/plugins/slimScroll/jquery.slimscroll.min.js")}}"></script>
 <script src="{{asset("js/plugins/niceScroll/jquery.nicescroll.js")}}"></script>
 
-
 <script src="{{asset('js/inspinia.js')}}"></script>
 <script src="{{asset('js/plugins/pace/pace.min.js')}}"></script>
 
@@ -226,6 +225,12 @@
             background: '#E5E9E7',
             cursorwidth: '10px',
             cursorcolor: '#999999'
+        });
+
+        $(".btn-loading, input[type='submit']").data("loading-text", "");
+
+        $("form").submit(function() {
+            $('.btn-loading').button('loading');
         });
 
         if(window.location.hash) {

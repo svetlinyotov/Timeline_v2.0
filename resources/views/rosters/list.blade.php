@@ -1,11 +1,12 @@
 @extends('layouts.master')
 
 @section('style')
-    <link rel="stylesheet" href="{{asset("plugins/fullcalendar/fullcalendar.min.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/fullcalendar/scheduler.min.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/fullcalendar/fullcalendar.print.css")}}" media="print">
-    <link rel="stylesheet" href="{{asset("plugins/daterangepicker/daterangepicker.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/iCheck/all.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/fullcalendar.min.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/scheduler.min.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/fullcalendar.print.css")}}" media="print">
+    <link rel="stylesheet" href="{{asset("css/plugins/daterangepicker/daterangepicker-bs3.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/iCheck/custom.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/toastr/toastr.min.css")}}">
     <style>
         .color-gray {
             background-color: #c0c0c0;
@@ -32,18 +33,18 @@
 @stop
 
 @section('script')
-    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp&sensor=true"></script>
-    <script src="{{asset("/plugins/fullcalendar/fullcalendar.min.js")}}"></script>
-    <script src="{{asset("/plugins/fullcalendar/scheduler.min.js")}}"></script>
+    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+    <script src="{{asset("js/plugins/fullcalendar/fullcalendar.min.js")}}"></script>
+    <script src="{{asset("js/plugins/fullcalendar/scheduler.min.js")}}"></script>
     @if(Auth::user()->role != "worker")
         <script src="{{asset("js/mapAddUser.js")}}"></script>
     @endif
     <script src="{{asset("js/mapRosters.js")}}"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
-    <script src="{{asset("plugins/daterangepicker/daterangepicker.js")}}"></script>
-    <script src="{{asset("plugins/iCheck/icheck.min.js")}}"></script>
-    <script src="{{asset("plugins/bootstrap-notify/bootstrap-notify.min.js")}}"></script>
-    <script src="{{asset("js/fullcalendar.extention.js")}}"></script>
+    <script src="{{asset("js/plugins/daterangepicker/daterangepicker.js")}}"></script>
+    <script src="{{asset("js/plugins/iCheck/icheck.min.js")}}"></script>
+    <script src="{{asset("js/plugins/fullcalendar/fullcalendar.extention.js")}}"></script>
+    <script src="{{asset("js/plugins/toastr/toastr.min.js")}}"></script>
 
     <script>
         $(function () {
@@ -52,6 +53,24 @@
                 checkboxClass: 'icheckbox_minimal-blue',
                 radioClass: 'iradio_minimal-blue'
             });
+
+            toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
 
             $('.time_picker').daterangepicker({
                 timePicker: true,
@@ -68,20 +87,13 @@
                     method: "POST",
                     data: {new_time_start:event.start.format(), new_time_end:event.end.format(), user_id:event.resourceId, "_token":'{{csrf_token()}}'},
                     success: function () {
-                        $(this).fullCalendar('updateEvent', event);
-                        $.notify({
-                            message: "Event "+event.title+" updated.<br>New times: "+event.start.format()+" - "+event.end.format()
-                        },{
-                            type: 'success'
-                        });
+                        $(this).fullCalendar( 'refetchEvents' );
+                        toastr["success"]("Event "+event.title+" updated.","New times:<br>"+event.start.format()+" <br> "+event.end.format());
                     },
                     error: function (msg) {
                         revertFunc();
-                        $.notify({
-                            message: msg.responseJSON['range']
-                        },{
-                            type: 'danger'
-                        });
+
+                        toastr["error"]("Error("+msg.status+"): " + msg.responseJSON['range']);
                     }
                 });
             }
@@ -95,9 +107,9 @@
                 resourceAreaWidth: 220,
                 firstDay: 1,
                 businessHours: {
-                    start: '{{Auth::user()->company != null ? \App\Common::formatTimeFromSQL24(Auth::user()->company->shift_day_start) : '08:00'}}',
-                    end: '{{Auth::user()->company != null ? \App\Common::formatTimeFromSQL24(Auth::user()->company->shift_night_start) : '20:00'}}',
-                    dow: [ 1, 2, 3, 4, 5],
+                    start: '{{Auth::user()->company != null ? \App\Common::formatTimeFromSQL24("08:00") : '08:00'}}',
+                    end: '{{Auth::user()->company != null ? \App\Common::formatTimeFromSQL24("08:00") : '20:00'}}',
+                    dow: [ 1, 2, 3, 4, 5]
                 },
                 header: {
                     left: 'today prev,next',
@@ -116,22 +128,15 @@
                     resources: {
                         url: '{{asset('/rosters/workers/'.$company_id)}}',
                         error: function(msg) {
-                            $.notify({
-                                message: msg.responseJSON
-                            },{
-                                type: 'danger'
-                            });
+                            console.log(msg);
+                            toastr["error"]("Error("+msg.status+"): " + msg.statusText);
                         }
                     },
                 @endif
                 events: {
                     url: '{{asset('/rosters/events/'.$company_id)}}',
                     error: function(msg) {
-                        $.notify({
-                            message: msg.responseJSON
-                        },{
-                            type: 'danger'
-                        });
+                        toastr["error"]("Error("+msg.status+"): " + msg.statusText);
                     }
                 },
                 @if(Auth::user()->role != "worker")
@@ -239,6 +244,7 @@
                         }else{
                             $('#add').modal('hide');
                             $("#calendar").fullCalendar('refetchEvents');
+                            toastr["success"]("Event saved");
                         }
                     }
                 });
@@ -263,6 +269,7 @@
                         }else{
                             $('#edit').modal('hide');
                             $("#calendar").fullCalendar('refetchEvents');
+                            toastr["success"]("Event updated");
                         }
                     }
                 });

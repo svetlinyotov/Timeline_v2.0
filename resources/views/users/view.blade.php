@@ -46,7 +46,7 @@
 
 @section('body')
     @if(Session::has('message'))
-        <div class="callout callout-success callout-sm">
+        <div class="alert alert-success">
             <i class="fa fa-check"></i> {!! Session::get('message') !!}
         </div>
     @endif
