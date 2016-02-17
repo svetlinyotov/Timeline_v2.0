@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" promptOnRemoteOverwrite="CHECK_TIMESTAMP" serverName="sisdevelop.com" createEmptyFolders="true">
     <serverData>
       <paths name="SORA">
         <serverdata>
@@ -26,7 +26,7 @@
       <paths name="sisdevelop.com">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/public_html/timeline/beta" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
