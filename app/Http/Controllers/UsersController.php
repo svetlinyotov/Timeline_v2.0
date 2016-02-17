@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Common;
 use App\Company;
 use App\ImageResize;
+use App\Messages;
 use App\Notification;
 use App\PersonalInfo;
 use App\User;
@@ -365,4 +366,18 @@ class UsersController extends Controller
         $user->company()->attach($company_id);
         return redirect('/users')->with(['message' => "User $email is linked successfully."]);
     }
+
+    public function showMessages($id = null)
+    {
+        if($id == null) $id = Auth::user()->id;
+        $messages = Messages::getWithUser($id);
+
+        return view('users.messages')->with(['messages' => $messages]);
+    }
+
+    public function readMessage($id)
+    {
+        //TODO: Return view with detailed info about message
+    }
+
 }

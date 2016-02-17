@@ -58,6 +58,11 @@ class User extends Model implements AuthenticatableContract,
         return $this->hasMany('App\Notification');
     }
 
+    public function messages()
+    {
+        return $this->hasMany('App\Messages');
+    }
+
     public static function notLinkedCompanies($user_id)
     {
         return DB::select("

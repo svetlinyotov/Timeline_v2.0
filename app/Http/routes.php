@@ -16,6 +16,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('profile', 'UsersController@show');
     Route::get('profile/edit', 'UsersController@edit');
     Route::get('profile/notifications', 'UsersController@showAllNotifications');
+    Route::get('profile/messages', 'UsersController@showMessages');
+    Route::get('profile/messages/{id}', 'UsersController@readMessage');
 
     Route::group(['middleware' => 'auth.supadmin'], function () {
         Route::get('/companies/{company_id}/shifts', 'CompaniesController@shiftsShow');

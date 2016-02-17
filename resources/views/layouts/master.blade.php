@@ -35,7 +35,7 @@
                         <ul class="dropdown-menu animated fadeInRight m-t-xs">
                             <li><a href="{{asset('profile')}}">Profile</a></li>
                             <li><a href="{{asset('profile/notifications')}}">Notifications</a></li>
-                            <li><a href="#">Messages</a></li>
+                            <li><a href="{{asset('profile/messages')}}">Messages</a></li>
                             <li class="divider"></li>
                             <li><a href="{{asset('logout')}}">Logout</a></li>
                         </ul>
@@ -112,9 +112,6 @@
                         <ul class="dropdown-menu dropdown-messages">
                             <li>
                                 <div class="dropdown-messages-box">
-                                    <a href="profile.html" class="pull-left">
-                                        <img alt="image" class="img-circle" src="">
-                                    </a>
                                     <div class="media-body">
                                         <small class="pull-right">46h ago</small>
                                         <strong>Mike Loreipsum</strong> started following <strong>Monica Smith</strong>. <br>
@@ -126,7 +123,7 @@
 
                             <li>
                                 <div class="text-center link-block">
-                                    <a href="mailbox.html">
+                                    <a href="{{asset('profile/messages')}}">
                                         <i class="fa fa-envelope"></i> <strong>Read All Messages</strong>
                                     </a>
                                 </div>
