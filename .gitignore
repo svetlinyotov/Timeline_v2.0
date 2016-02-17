@@ -3,4 +3,5 @@
 /public/error_log
 Homestead.yaml
 Homestead.json
+/.idea
 .env
