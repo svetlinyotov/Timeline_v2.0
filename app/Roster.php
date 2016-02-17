@@ -27,7 +27,7 @@ class Roster extends Model
         return DB::select("
           SELECT
           rosters.id as id,
-          rosters.user_id as resourceId,
+          ru.user_id as resourceId,
           rosters.start_time as start,
           rosters.end_time as end,
           rosters.name as title,
@@ -43,7 +43,14 @@ class Roster extends Model
               WHEN rosters.status = 'declined' THEN 'color-red'
               WHEN rosters.status = 'canceled' THEN 'color-white'
           END as className
-          FROM rosters LEFT JOIN users ON users.id = rosters.user_id WHERE users.company_id = ? AND start_time BETWEEN ? and ? OR end_time BETWEEN ? and ?", [$company_id, $data['start'], $data['end'], $data['start'], $data['end']]);
+          FROM rosters
+          left JOIN roster_user ru ON ru.roster_id = rosters.id
+          LEFT JOIN users ON users.id = ru.user_id
+          LEFT JOIN company_user cu ON cu.user_id = users.id
+          WHERE
+            cu.company_id = ?
+            AND (start_time BETWEEN ? and ? OR end_time BETWEEN ? and ?)
+          ", [$company_id, $data['start'], $data['end'], $data['start'], $data['end']]);
     }
 
     public static function overlap($user_id, $start, $end, $event_id=null)

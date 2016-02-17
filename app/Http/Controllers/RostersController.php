@@ -26,7 +26,7 @@ class RostersController extends Controller
         if(Auth::user()->role == "supadmin") {
             $company_id = $request->get('company_id');
         }else{
-            $company_id = Auth::user()->company_id;
+            $company_id = $this->company_id;
         }
 
         $companies = Company::listAll();
@@ -61,8 +61,11 @@ class RostersController extends Controller
         $roster->added_by = Auth::user()->id;
         $roster->save();
 
+        User::find($user_id)->rosters()->attach($roster->id);
+
         Notification::add($user_id, 'CREATE_EVENT', ['start'=>Common::formatDateTimeForSQL($start), 'end'=>Common::formatDateTimeForSQL($end), 'admin_id' => Auth::user()->id]);
 
+        return response()->json("Done", 200);
     }
 
     public function updateEvent(Request $request, $event_id)

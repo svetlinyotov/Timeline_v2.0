@@ -18,8 +18,11 @@ class AppServiceProvider extends ServiceProvider
     {
         view()->composer('layouts.master', function($view)
         {
+            $notification_obj = Notification::read(Auth::user()->id, true, 3);
+            $notification_list = Notification::format($notification_obj);
+
             $view->with('user_notification_count', Notification::count(Auth::user()->id));
-            $view->with('user_notification_list', Notification::read(Auth::user()->id, true, 3));
+            $view->with('user_notification_list', $notification_list);
         });
 
         view()->composer('users.list', function($view){
