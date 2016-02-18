@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Messages;
 use App\Notification;
 use App\User;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with('user_notification_count', Notification::count(Auth::user()->id));
             $view->with('user_notification_list', $notification_list);
+            $view->with('user_messages_count', Messages::countUnseen());
+            $view->with('user_messages_list', Messages::topUnseen(3));
         });
 
         view()->composer('users.list', function($view){

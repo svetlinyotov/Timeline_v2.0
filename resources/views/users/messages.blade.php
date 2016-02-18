@@ -25,23 +25,33 @@
 @section('body')
 <div class="row">
     <div class="mail-box">
-        @if(count($messages) == 0)
-            <div class="alert alert-info">
-                No messages in your inbox
-            </div>
-        @endif
         <div class="col-lg-12 animated fadeInRight">
+            <a href="{{asset("/profile/messages/compose")}}" class="btn btn-primary">Compose</a><br><br>
+
+            @if(Session::has('message') || isset($_GET['message']))
+                <div class="alert alert-success alert-dismissable">
+                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button"><i class="fa fa-times"></i></button>
+                    <i class="fa fa-check"></i> {!! Session::get('message') !!} {!! $_GET['message']??"" !!}
+                </div>
+            @endif
+
+            @if(count($messages) == 0)
+                <div class="alert alert-info">
+                    No messages in your inbox
+                </div>
+            @endif
+
             <table class="table table-hover table-mail">
                 <tbody>
                     @foreach($messages as $message)
                         <tr class="{{$message->is_read?"read":"unread"}}">
                             <td class="check-mail">
-                                <i class="fa {{$message->is_read?"fa-envelope":"fa-envelope-o"}}"></i>
+                                <img alt="Profile Image" class="img-circle" src="{{asset('avatar/'.$message->user->info->avatar)}}" height="40" />
                             </td>
                             <td class="mail-ontact"><a href="{{asset("/profile/messages/".$message->id)}}">{{$message->user->info->names}} ({{$message->user->email}})</a></td>
                             <td class="mail-subject"><a href="{{asset("/profile/messages/".$message->id)}}">{{$message->title}}</a></td>
-                            <td class="">{{mb_substr($message->text, 0, 50)}}...</td>
-                            <td class="text-right mail-date" data-toggle="tooltip" data-placement="left" title="{{$message->created_at}}">{{\App\Common::timeAgo($message->created_at)}}</td>
+                            <td class="">{{mb_substr(strip_tags($message->text), 0, 50)}}...</td>
+                            <td class="text-right mail-date"><span  data-toggle="tooltip" data-placement="left" title="{{$message->created_at}}">{{\App\Common::timeAgo($message->created_at)}}</span></td>
                         </tr>
                     @endforeach
                 </tbody>

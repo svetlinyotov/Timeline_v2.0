@@ -107,19 +107,24 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
-                            <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                            <i class="fa fa-envelope"></i>  <span class="label label-warning">{{$user_messages_count}}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
-                            <li>
-                                <div class="dropdown-messages-box">
-                                    <div class="media-body">
-                                        <small class="pull-right">46h ago</small>
-                                        <strong>Mike Loreipsum</strong> started following <strong>Monica Smith</strong>. <br>
-                                        <small class="text-muted">3 days ago at 7:58 pm - 10.06.2014</small>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="divider"></li>
+                            @foreach($user_messages_list as $message)
+                                <li>
+                                    <a href="{{asset("/profile/messages/".$message->id)}}">
+                                        <div class="dropdown-messages-box">
+                                            <div class="media-body">
+                                                <small class="pull-right">{{\App\Common::timeAgo($message->created_at)}}</small>
+                                                <strong>{{$message->user->info->names}}</strong> ({{$message->user->email}})<br>
+                                                <p>{{mb_substr(strip_tags($message->text), 0, 50)}}...</p>
+                                                <small class="text-muted">{{\App\Common::timeAgo($message->created_at)}} at {{$message->created_at}}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                            @endforeach
 
                             <li>
                                 <div class="text-center link-block">
@@ -223,6 +228,8 @@
             cursorwidth: '10px',
             cursorcolor: '#999999'
         });
+
+        $('[data-toggle="tooltip"]').tooltip();
 
         $(".btn-loading, input[type='submit']").data("loading-text", "");
 

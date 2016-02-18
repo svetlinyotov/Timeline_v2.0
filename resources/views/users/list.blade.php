@@ -11,7 +11,6 @@
     <script>
         $(function () {
 
-            $('[data-toggle="tooltip"]').tooltip();
 
             $("#data").DataTable({
                 dom: '<"html5buttons"B>lTfgitp',
@@ -290,9 +289,9 @@
                                     <p>
 
                                     </p>
-                                    <button type="button" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#msg_user"><i
+                                    <a href="{{asset("/profile/messages/compose?to=".$user->email)}}&rel=users" class="btn btn-primary btn-sm btn-block"><i
                                                 class="fa fa-envelope"></i> Send Message
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
 
@@ -384,41 +383,6 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-info btn-loading">Next ></button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal modal-info fade" id="msg_user" tabindex="-1" role="dialog" aria-labelledby="modal_msg_user_label"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content panel-info">
-                <div class="modal-header panel-heading">
-                    <h3 class="margin-0"><i class="fa fa-envelope"></i> Send message to <p id="msg_user"></p></h3>
-                </div>
-                <form action="{{asset('/messages')}}" method="post" role="form">
-                    {{csrf_field()}}
-                    <div class="modal-body">
-                        @if (count($errors) > 0)
-                            <div class="alert alert-danger">
-                                @foreach ($errors->all() as $error)
-                                    {{ $error }}<br>
-                                @endforeach
-                            </div>
-                        @endif
-                        <div class="form-group @if($errors->first('title')) has-error @endif">
-                            <label class="control-label" for="title">Subject: </label>
-                            <input type="text" name="title" id="title" class="form-control" value="{{old("title")}}">
-                        </div>
-                        <div class="form-group @if($errors->first('text')) has-error @endif">
-                            <label class="control-label" for="text">Text: </label>
-                            <textarea name="text" id="text" class="form-control">{{old("text")}}</textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-info btn-loading">Send</button>
                     </div>
                 </form>
             </div>

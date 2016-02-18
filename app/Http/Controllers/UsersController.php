@@ -148,8 +148,9 @@ class UsersController extends Controller
         $notification_count = Notification::count($id);
         $notification_obj = Notification::read($id, true, 6);
         $notification_list = Notification::format($notification_obj);
+        $messages = Messages::topUnseen(5);
 
-        return view('users.view')->with(['user' => $user, 'notification_count' => $notification_count, 'notification_list' => $notification_list]);
+        return view('users.view')->with(['user' => $user, 'notification_count' => $notification_count, 'notification_list' => $notification_list, 'messages'=>$messages]);
     }
 
     public function showAllNotifications($id = null)
@@ -370,14 +371,56 @@ class UsersController extends Controller
     public function showMessages($id = null)
     {
         if($id == null) $id = Auth::user()->id;
-        $messages = Messages::getWithUser($id);
+        $messages = Messages::getAllWithUser($id);
 
         return view('users.messages')->with(['messages' => $messages]);
     }
 
     public function readMessage($id)
     {
-        //TODO: Return view with detailed info about message
+        $message = Messages::getByIdWithUser($id);
+        Messages::markAsRead($id);
+        return view('users.messages_read')->with(['message' => $message]);
+    }
+
+    public function sendMessageForm()
+    {
+        return view('users.messages_compose');
+    }
+
+    public function sendMessage(Request $request)
+    {
+        $rules = [
+            'to' => 'required|email',
+            'subject' => 'required|min:5',
+            'text' => 'required|min:5'
+        ];
+
+        $this->validate($request, $rules);
+
+        if(User::where('email', $request->input('to'))->count() != 1){
+            return redirect('/profile/messages/compose')->withErrors(['User does not exists'])->withInput(['to'=>$request->input('to'),'subject'=>$request->input('subject'),'text'=>$request->input('text')]);
+        }
+
+        $message = new Messages();
+        $message->user_id = User::select("id")->where('email', $request->input('to'))->first()->id;
+        $message->title = $request->input('subject');
+        $message->text = $request->input('text');
+        $message->send_by = Auth::user()->id;
+        $message->save();
+
+        return redirect('/profile/messages')->with(['message' => "Message sent to ".$request->input('to')]);
+    }
+
+    public function deleteMessage($id)
+    {
+        $user_id = Messages::where('id', $id)->first()->pluck('user_id');
+
+        if(Auth::user()->id != $user_id) {abort(401, "Unauthorized");}
+
+        Messages::destroy($id);
+
+        abort(200, "All done");
     }
 
 }

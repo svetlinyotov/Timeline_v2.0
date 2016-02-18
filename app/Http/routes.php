@@ -17,7 +17,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('profile/edit', 'UsersController@edit');
     Route::get('profile/notifications', 'UsersController@showAllNotifications');
     Route::get('profile/messages', 'UsersController@showMessages');
+    Route::get('profile/messages/compose', 'UsersController@sendMessageForm');
+    Route::put('profile/messages/compose', 'UsersController@sendMessage');
     Route::get('profile/messages/{id}', 'UsersController@readMessage');
+    Route::delete('profile/messages/{id}', 'UsersController@deleteMessage');
 
     Route::group(['middleware' => 'auth.supadmin'], function () {
         Route::get('/companies/{company_id}/shifts', 'CompaniesController@shiftsShow');

@@ -72,6 +72,13 @@
                 </div>
             </div>
         </div>
+
+        @if(Session::has('message'))
+            <div class="alert alert-success">
+                <i class="fa fa-check"></i> {!! Session::get('message') !!}
+            </div>
+        @endif
+
         <div class="col-md-3">
             <table class="table small m-b-xs">
                 <tbody>
@@ -161,15 +168,24 @@
                         Send message to {{$user->info->names}}
                     </p>
 
-                    <div class="form-group">
-                        <label>Subject</label>
-                        <input type="email" class="form-control" placeholder="Message subject">
-                    </div>
-                    <div class="form-group">
-                        <label>Message</label>
-                        <textarea class="form-control" placeholder="Your message" rows="3"></textarea>
-                    </div>
-                    <button class="btn btn-primary btn-block">Send</button>
+                    @if ($errors->any())
+                        <div class="alert alert-danger">{!! implode('<br>', $errors->all(':message')) !!}</div>
+                    @endif
+
+                    <form action="{{asset("/profile/messages/compose")}}" method="post">
+                        {{csrf_field()}}
+                        <input type="hidden" name="_method" value="put">
+                        <input type="hidden" name="to" value="{{$user->email}}">
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <input type="text" class="form-control" name="subject" placeholder="Message subject">
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea class="form-control" placeholder="Your message" name="text" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Send</button>
+                    </form>
 
                 </div>
             </div>
@@ -181,7 +197,7 @@
 
             <div class="ibox">
                 <div class="ibox-content">
-                    <h3><a href="@if(Request::segment(1) != 'profile'){{asset('/users/'.$user->id.'/notifications')}}@else{{asset('/profile/notifications')}}@endif">Notifications <small>(unseen)</small></a></h3>
+                    <h3><a href="@if(Request::segment(1) != 'profile'){{asset('/users/'.$user->id.'/notifications')}}@else{{asset('/profile/notifications')}}@endif">Notifications <small>(last 6 unseen)</small></a></h3>
 
                     <div class="list-group">
                         @foreach($notification_list as $notification)
@@ -196,21 +212,26 @@
                     </div>
                 </div>
             </div>
-
+            @if(Request::segment(1) == 'profile')
             <div class="ibox">
                 <div class="ibox-content">
-                    <h3>Messages <small>(unseen)</small> </h3>
+                    <h3><a href="{{asset('/profile/messages')}}?rel=profile"> Messages</a> <small>(last 5 unseen)</small> </h3>
 
                     <div class="list-group">
-                        @foreach($notification_list as $notification)
-                            <a href="{{$notification['link']}}?noti={{$notification['id']}}" class="list-group-item @if($notification['is_read'] == 0) list-group-item-warning @endif">
-                                {!! $notification['text'] !!}
-                                <small class="pull-right">{{$notification['date']}}</small>
+                        @foreach($messages as $message)
+                            <a href="{{asset('/profile/messages/'.$message->id)}}?rel=profile" class="list-group-item">
+                                <b>From: </b> {{$message->user->email}}<br>
+                                <p>{!! $message->text !!}</p>
+                                <small class="pull-right">{{\App\Common::timeAgo($message->created_at)}}</small>
                             </a>
                         @endforeach
+                        <a href="{{asset('/profile/messages')}}?rel=profile" class="list-group-item list-group-item-info text-center">
+                            <h3>See All</h3>
+                        </a>
                     </div>
                 </div>
             </div>
+            @endif
 
         </div>
 
