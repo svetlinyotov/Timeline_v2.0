@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RostersController extends Controller
 {
@@ -26,12 +27,17 @@ class RostersController extends Controller
         if(Auth::user()->role == "supadmin") {
             $company_id = $request->get('company_id');
         }else{
-            $company_id = $this->company_id;
+            $company_id = $this->company_id[0];
+        }
+        $start_shift = $end_shift = "";
+        if($company_id){
+            $start_shift = Company::find($company_id)->shift_day_start;
+            $end_shift = Company::find($company_id)->shift_night_start;
         }
 
         $companies = Company::listAll();
         $workers = Company::workers($company_id);
-        return view('rosters.list')->with(['company_id' => $company_id, 'workers' => $workers, 'companies' => $companies]);
+        return view('rosters.list')->with(['company_id' => $company_id, 'shift_start'=>$start_shift, 'shift_end' => $end_shift, 'workers' => $workers, 'companies' => $companies]);
     }
 
     public function store(Request $request, $user_id)
@@ -50,7 +56,6 @@ class RostersController extends Controller
         }
 
         $roster = new Roster();
-        $roster->user_id = $user_id;
         $roster->name = $request->input('name');
         $roster->is_supervisor = $request->input('is_supervisor');
         $roster->start_time = Common::formatDateTimeForSQL($start);
@@ -74,10 +79,12 @@ class RostersController extends Controller
         if(Roster::overlap($request->input('user_id'), Common::formatDateTimeForSQL($request->input('new_time_start')), Common::formatDateTimeForSQL($request->input('new_time_end')), $event_id) === true){
             return response()->json(['range' => 'The time range overlaps for this user.'], 422);
         }
+        if(!Common::isInTheFuture(Common::formatDateTimeForSQL($request->input('new_time_start')))){
+            return response()->json(['range' => 'You cannot update past event'], 422);
+        }
 
         $roster->start_time = $request->input('new_time_start');
         $roster->end_time = $request->input('new_time_end');
-        $roster->user_id = $request->input('user_id');
         $roster->save();
 
         Notification::add($request->input('user_id'), 'UPDATE_EVENT', ['start'=>$request->input('new_time_start'), 'end'=>$request->input('new_time_end'), 'title'=>$roster->name, 'admin_id' => Auth::user()->id]);
@@ -85,7 +92,13 @@ class RostersController extends Controller
 
     public function update(Request $request, $event_id)
     {
-        $roster = Roster::find($event_id);
+        $user_id = $request->input('user_id');
+        $roster = Roster::where('rosters.id', $event_id)->
+                        leftJoin('roster_user as ru', function($join) use ($user_id) {
+                            $join->on('ru.roster_id', '=', 'rosters.id')
+                                 ->where('ru.user_id', '=', $user_id);
+                        })->select('rosters.*', 'ru.status')->first();
+        $roster_users = Roster::find($roster->id)->users()->select('users.id')->get()->pluck('id')->toArray();
 
         if(Auth::user()->role != "worker") {
             $this->validate($request, [
@@ -96,9 +109,16 @@ class RostersController extends Controller
             ]);
 
             list($start, $end) = explode(' - ', $request->input('time_range'));
+            $overlapping_users = [];
 
-            if (Roster::overlap($roster->user_id, Common::formatDateTimeForSQL($start), Common::formatDateTimeForSQL($end), $event_id) === true) {
-                return response()->json(['range' => 'The time range overlaps for this user.'], 422);
+            foreach ($roster_users as $roster_user) {
+                if (Roster::overlap($roster_user, Common::formatDateTimeForSQL($start), Common::formatDateTimeForSQL($end), $event_id) === true) {
+                    $overlapping_users[] = $roster_user;
+                }
+            }
+
+            if(count($overlapping_users)){
+                return response()->json(['range' => 'The time range overlaps for '. implode(', ', $overlapping_users) .'.'], 422);
             }
         }else{
             $start = $roster->start_time;
@@ -110,7 +130,7 @@ class RostersController extends Controller
                 return response()->json(['range' => 'You are not authorized to cancel event'], 422);
 
             if(($roster->status == '' || $roster->status == 'pending') || Auth::user()->role != "worker"){
-                $roster->status = $request->input('status');
+                DB::update("UPDATE roster_user SET status = ? WHERE user_id = ? AND roster_id = ?", [$request->input('status'), $user_id, $roster->id]);
             }else{
                 return response()->json(['range' => 'You cannot update this event'], 422);
             }
@@ -127,7 +147,9 @@ class RostersController extends Controller
             $roster->address = $request->input('address');
             $roster->coordinates = $request->input('coordinates');
 
-            Notification::add($roster->user_id, 'UPDATE_EVENT', ['start'=>Common::formatDateTimeForSQL($start), 'end'=>Common::formatDateTimeForSQL($end), 'title'=>$roster->name, 'admin_id' => Auth::user()->id]);
+            foreach ($roster_users as $roster_user) {
+                Notification::add($roster_user, 'UPDATE_EVENT', ['start'=>Common::formatDateTimeForSQL($start), 'end'=>Common::formatDateTimeForSQL($end), 'title'=>$roster->name, 'admin_id' => Auth::user()->id]);
+            }
         }
         $roster->save();
     }

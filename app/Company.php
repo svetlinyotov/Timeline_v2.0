@@ -26,10 +26,16 @@ class Company extends Model
 
     public static function workers($company_id = null)
     {
-        $company = Company::find($company_id);
+        $company = self::find($company_id);
         if($company == null) return false;
 
-        return $company->users()->join('usersPersonalInfo as info', 'info.user_id', '=', 'users.id')->select('users.id', 'info.names as title')->get()->map(function($item) {return collect($item)->except('company_id');});
+        return DB::select("
+            SELECT u.id, info.names as title
+            FROM users u
+            JOIN usersPersonalInfo info on info.user_id = u.id
+            LEFT JOIN company_user cu ON cu.user_id = u.id
+            WHERE cu.company_id = ?
+        ", [$company_id]);
     }
 
 }

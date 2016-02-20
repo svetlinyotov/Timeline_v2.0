@@ -10,9 +10,9 @@ class Roster extends Model
 {
     protected $table = 'rosters';
     
-    protected $fillable = ['user_id', 'is_supervisor', 'start_time', 'end_time', 'real_start_time', 'real_end_time', 'other', 'address', 'status', 'added_by'];
+    protected $fillable = ['is_supervisor', 'start_time', 'end_time', 'real_start_time', 'real_end_time', 'other', 'address', 'status', 'added_by'];
 
-    public function user()
+    public function users()
     {
         return $this->belongsToMany('App\User');
     }
@@ -35,13 +35,13 @@ class Roster extends Model
           rosters.address as address,
           rosters.coordinates as coordinates,
           rosters.is_supervisor as supervisor,
-          rosters.status as status,
+          ru.status as status,
           users.email as user,
           CASE
-              WHEN rosters.status = 'pending' OR rosters.status = '' THEN 'color-gray'
-              WHEN rosters.status = 'accepted' THEN 'color-green'
-              WHEN rosters.status = 'declined' THEN 'color-red'
-              WHEN rosters.status = 'canceled' THEN 'color-white'
+              WHEN ru.status = 'pending' OR ru.status = '' THEN 'color-gray'
+              WHEN ru.status = 'accepted' THEN 'color-green'
+              WHEN ru.status = 'declined' THEN 'color-red'
+              WHEN ru.status = 'canceled' THEN 'color-white'
           END as className
           FROM rosters
           left JOIN roster_user ru ON ru.roster_id = rosters.id
@@ -62,23 +62,24 @@ class Roster extends Model
         $query = DB::select("
             SELECT * FROM rosters
             WHERE id NOT IN (
-                SELECT id
+                SELECT rosters.id
                 FROM rosters
-                WHERE user_id = ? AND
+                LEFT JOIN roster_user ru ON ru.roster_id = rosters.id
+                WHERE ru.user_id = ? AND
                       ((start_time <= ? AND start_time <= ? AND end_time <= ? AND end_time <= ?) OR
                       (start_time >= ? AND start_time >= ? AND end_time >= ? AND end_time >= ?))
-            ) AND user_id = ? $where
+            ) $where
             ",
             $event_id==null?[$user_id, $start, $end, $start, $end, $start, $end, $start, $end, $user_id]:[$user_id, $start, $end, $start, $end, $start, $end, $start, $end, $user_id, $event_id]);
         return count($query) != 0;
     }
 
-    public static function payment($id) : float
+    public static function payment($id, $company_id) : float
     {
-        $company_id = Roster::find($id)->user->company_id;
         $company_shift_start = Company::where('id', $company_id)->select('shift_day_start as day', 'shift_night_start as night')->first();
 
         $roster = Roster::where('id',$id)->select('real_start_time as start', 'real_end_time as end', 'is_supervisor')->first();
+
         if($roster->start != null && $roster->end != null) {
             $start_str = strtotime($roster->start);
             $end_str = strtotime($roster->end);
@@ -100,7 +101,8 @@ class Roster extends Model
                 $payment += $amount * ((5 / 60) * $time_count);
             }
 
-            return number_format((float)$payment, 2, '.', '');
+            return number_format((float)$payment, 2, '.', '')??0;
         }
+        return 0;
     }
 }
