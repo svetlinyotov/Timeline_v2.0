@@ -28,7 +28,7 @@ class PaymentsController extends Controller
         if(Auth::user()->role == "supadmin") {
             $company_id = $request->get('company_id');
         }else{
-            $company_id = Auth::user()->company_id;
+            $company_id = $this->company_id[0];
         }
 
         $currency = $company_id!=null ? Company::find($company_id)->currency->title : null;
@@ -36,7 +36,7 @@ class PaymentsController extends Controller
         if(Auth::user()->role == "supadmin") {
             $data = Payment::users($company_id, $start_time, $end_time);
         } else
-            $data = Payment::users(Auth::user()->company_id, $start_time, $end_time);
+            $data = Payment::users($this->company_id[0], $start_time, $end_time);
 
         return view('payment.list_users')->with(['data' => $data, 'currency' => $currency, 'companies' => Company::listAll()]);
     }

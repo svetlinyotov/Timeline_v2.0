@@ -16,14 +16,14 @@ class Payment extends Model
     {
         if($company_id == null) return null;
 
-        $user = User::where('company_id', $company_id)->with('info')->get();
+        $user = User::whereHas('company', function($q) use ($company_id){$q->where('companies.id', $company_id);})->with('info')->get();
 
         $arr = [];
         foreach ($user as $value) {
-            $rosters = Roster::where('user_id', $value->id)->whereBetween('start_time', [$start, $end])->get();
+            $rosters = Roster::whereHas('users', function($q) use ($value){$q->where('users.id', $value->id);})->whereBetween('start_time', [$start, $end])->get();
             $sum = 0;
             foreach ($rosters as $roster) {
-                $sum += Roster::payment($roster->id);
+                $sum += Roster::payment($roster->id, $company_id);
             }
             array_push($arr, ['names' => $value->info->names, 'mobile' => $value->info->mobile, 'email' => $value->email, 'salary' => $sum, 'id' => $value->id]);
         }
