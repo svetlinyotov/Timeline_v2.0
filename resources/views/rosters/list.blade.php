@@ -4,7 +4,6 @@
     <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/fullcalendar.min.css")}}">
     <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/scheduler.min.css")}}">
     <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/fullcalendar.print.css")}}" media="print">
-    <link rel="stylesheet" href="{{asset("css/plugins/daterangepicker/daterangepicker-bs3.css")}}">
     <link rel="stylesheet" href="{{asset("css/plugins/iCheck/custom.css")}}">
     <link rel="stylesheet" href="{{asset("css/plugins/toastr/toastr.min.css")}}">
     <style>
@@ -35,7 +34,7 @@
 @section('script')
     <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
-    <script src="{{asset("js/plugins/fullcalendar/fullcalendar.min.js")}}"></script>
+    <script src="{{asset("js/plugins/fullcalendar/fullcalendar.js")}}"></script>
     <script src="{{asset("js/plugins/fullcalendar/scheduler.min.js")}}"></script>
     @if(Auth::user()->role != "worker")
         <script src="{{asset("js/mapAddUser.js")}}"></script>
@@ -43,7 +42,6 @@
     <script src="{{asset("js/mapRosters.js")}}"></script>
     <script src="{{asset("js/plugins/daterangepicker/daterangepicker.js")}}"></script>
     <script src="{{asset("js/plugins/iCheck/icheck.min.js")}}"></script>
-    <script src="{{asset("js/plugins/fullcalendar/fullcalendar.extention.js")}}"></script>
     <script src="{{asset("js/plugins/toastr/toastr.min.js")}}"></script>
 
     <script>
@@ -72,15 +70,6 @@
                 "hideMethod": "fadeOut"
             };
 
-            $('.time_picker').daterangepicker({
-                timePicker: true,
-                timePickerIncrement: 5,
-                minDate: new Date(new Date().setDate(new Date().getDate()-1)),
-                locale: {
-                    format: 'MM/DD/YYYY h:mm A'
-                },
-            });
-
             var update_function = function(event, delta, revertFunc) {
                 $.ajax({
                     url: '{{asset('/rosters/events')}}/'+event.id,
@@ -102,14 +91,15 @@
                 @if(Auth::user()->role != "worker")
                     editable: true,
                 @endif
-                height: $(window).height()-200,
+                height: $(window).height()-300,
+                nowIndicator: true,
                 scrollTime: '00:00',
                 resourceAreaWidth: 220,
                 firstDay: 1,
                 businessHours: {
-                    start: '{{Auth::user()->company != null ? \App\Common::formatTimeFromSQL24("08:00") : '08:00'}}',
-                    end: '{{Auth::user()->company != null ? \App\Common::formatTimeFromSQL24("08:00") : '20:00'}}',
-                    dow: [ 1, 2, 3, 4, 5]
+                    start: '{{\App\Common::formatTimeFromSQL24($shift_start)}}',
+                    end: '{{\App\Common::formatTimeFromSQL24($shift_end)}}',
+                    dow: [ 1, 2, 3, 4, 5, 6, 7]
                 },
                 header: {
                     left: 'today prev,next',
@@ -171,7 +161,7 @@
                             modal.find('#status-text').html(event.status);
                         }
                     @endif
-
+                    modal.find(".user_id_input").val(event.resourceId);
                     modal.find("#time_range_edit").val(moment(event.start).format('M/D/YYYY h:mm A') + ' - ' + moment(event.end).format('M/D/YYYY h:mm A'));
                     modal.find("#time_range_edit_text").html(moment(event.start).format('M/D/YYYY h:mm A') + ' - ' + moment(event.end).format('M/D/YYYY h:mm A'));
                     modal.find("#name_edit").val(event.title);
@@ -197,16 +187,7 @@
 
                     modal.modal();
                     codeAddressNew();
-                },
-                viewRender: function(view) {
-                    if(typeof(timelineInterval) != 'undefined'){
-                        window.clearInterval(timelineInterval);
-                    }
-                    timelineInterval = window.setInterval(setTimeline, 300000);
-                    try {
-                        setTimeline();
-                    } catch(err) {}
-                },
+                }
             });
 
             $('#add').on('show.bs.modal', function (event) {
@@ -222,7 +203,7 @@
                 modal.find('.modal-title').text('New roster - ' + name);
                 modal.find('input[name=_action]').val('{{asset('/users')}}/'+id+'/roster#add');
             }).on('hidden.bs.modal', function (e) {
-                history.pushState("", document.title, window.location.pathname);
+                //history.pushState("", document.title, window.location.pathname);
                 $('#add_error').hide();
                 document.getElementById("add_roster").reset();
             });
@@ -348,6 +329,7 @@
                 <form action="" method="post" id="add_roster">
                     {{csrf_field()}}
                     <input type="hidden" name="_action" value="">
+                    <input type="hidden" name="user_id" class="user_id_input" value="">
                     <div class="modal-body">
 
                         <div id="add_error" class="alert alert-danger" style="display: none"></div>
@@ -413,6 +395,7 @@
                     {{csrf_field()}}
                     <input type="hidden" name="_method" value="put">
                     <input type="hidden" name="_action" value="">
+                    <input type="hidden" name="user_id" class="user_id_input" value="">
                     <div class="modal-body">
 
                         <div id="edit_error" class="alert alert-danger" style="display: none"></div>
