@@ -50,13 +50,13 @@
 
 @section('title')
     <h1>
-        <a href="{{asset("payments?company_id=".$user_company_id)}}" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
+        <a href="{{asset("payments?start=".($_GET['start'] ?? '')."&end=".($_GET['end'] ?? '')."&company_id=".$user_company_id)}}" class="btn btn-xs btn-circle btn-info"><i class="fa fa-arrow-left"></i> </a>
         Shifts
         <small>{{$user_email}}</small>
     </h1>
     <ol class="breadcrumb">
         <li><a href="{{asset("dashboard")}}"><i class="fa fa-money"></i> Home</a></li>
-        <li class="active"><a href="{{asset("payments?company_id".$user_company_id)}}">Payments</a></li>
+        <li class="active"><a href="{{asset("payments?start=".($_GET['start'] ?? '')."&end=".($_GET['end'] ?? '')."&company_id".$user_company_id)}}">Payments</a></li>
         <li class="active"><a href="{{asset('users/'.$user_id.'?rel=payment')}}">{{$user_email}}</a></li>
         <li class="active">Shifts</li>
     </ol>

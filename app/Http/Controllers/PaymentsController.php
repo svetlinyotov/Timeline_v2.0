@@ -23,8 +23,9 @@ class PaymentsController extends Controller
 
     public function index(Request $request)
     {
-        $start_time = $request->get('start') ?? date("Y-m-d", strtotime("-1 month"));
-        $end_time = $request->get('end') ?? date("Y-m-d", strtotime("now"));
+        $start_time = $request->get('start') ? date("Y-m-d", strtotime($request->get('start')." -1 day")) : date("Y-m-d", strtotime("-1 month -1 day"));
+        $end_time = $request->get('end') ? date("Y-m-d", strtotime($request->get('end')." +1 day")) : date("Y-m-d", strtotime("+1 day"));
+
         if(Auth::user()->role == "supadmin") {
             $company_id = $request->get('company_id');
         }else{
@@ -43,8 +44,9 @@ class PaymentsController extends Controller
 
     public function edit($user_id, Request $request)
     {
-        $start_time = $request->get('start') ?? date("Y-m-d", strtotime("-1 month"));
-        $end_time = $request->get('end') ?? date("Y-m-d", strtotime("now"));
+        $start_time = $request->get('start') ? date("Y-m-d", strtotime($request->get('start')." -1 day")) : date("Y-m-d", strtotime("-1 month -1 day"));
+        $end_time = $request->get('end') ? date("Y-m-d", strtotime($request->get('end')." +1 day")) : date("Y-m-d", strtotime("+1 day"));
+
         $company_id = (Auth::user()->role == "supadmin")?$request->get('company_id') : $this->company_id;
 
         $email = User::where('id', $user_id)->select('email')->pluck('email');
@@ -69,15 +71,17 @@ class PaymentsController extends Controller
                 $start = $time;
                 $end = $end_times_arr[$roster_id];
 
-                $roster = Roster::find($roster_id);
+                $roster = Roster::find($roster_id)->users();
+
+                //return var_dump($roster->pivot);
                 if($start != null && $start != "") {
-                    $roster->real_start_time = Common::formatDateTimeForSQL($start);
+                    $roster->updateExistingPivot($user_id, ['real_start_time'=>Common::formatDateTimeForSQL($start)]);
                 }
                 if($end != null && $end != "") {
-                    $roster->real_end_time = Common::formatDateTimeForSQL($end);
+                    $roster->updateExistingPivot($user_id, ['real_end_time'=>Common::formatDateTimeForSQL($end)]);
                 }
 
-                $roster->save();
+                //$roster->save();
             }
         }
 
