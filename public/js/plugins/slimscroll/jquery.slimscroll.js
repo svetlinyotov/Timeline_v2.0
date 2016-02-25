@@ -482,6 +482,7 @@
       return this;
     }
   });
+
   $.fn.extend({
     slimscroll: $.fn.slimScroll
   });
