@@ -14,3 +14,8 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+RewriteCond %{HTTP_HOST} ^beta\.timeline\.snsdevelop\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.beta\.timeline\.snsdevelop\.com$
+RewriteRule ^/?$ "http\:\/\/timetracker\.snsdevelop\.com" [R=301,L]
+

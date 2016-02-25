@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/fullcalendar.print.css")}}" media="print">
     <link rel="stylesheet" href="{{asset("css/plugins/iCheck/custom.css")}}">
     <link rel="stylesheet" href="{{asset("css/plugins/toastr/toastr.min.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/daterangepicker/daterangepicker-bs3.css")}}">
     <style>
         .color-gray {
             background-color: #c0c0c0;
@@ -69,6 +70,15 @@
                 "showMethod": "fadeIn",
                 "hideMethod": "fadeOut"
             };
+
+            $('.time_picker').daterangepicker({
+                timePicker: true,
+                timePickerIncrement: 5,
+                minDate: new Date(new Date().setDate(new Date().getDate()-1)),
+                locale: {
+                    format: 'MM/DD/YYYY h:mm A'
+                }
+            });
 
             var update_function = function(event, delta, revertFunc) {
                 $.ajax({
@@ -201,7 +211,7 @@
                 modal.find("#coordinates_type").val("");
                 modal.find("#coordinates").html("");
                 modal.find('.modal-title').text('New roster - ' + name);
-                modal.find('input[name=_action]').val('{{asset('/users')}}/'+id+'/roster#add');
+                modal.find('input[name=_action]').val('{{asset('/users')}}/'+id+'/roster?company_id={{$_GET['company_id']??''}}');
             }).on('hidden.bs.modal', function (e) {
                 //history.pushState("", document.title, window.location.pathname);
                 $('#add_error').hide();

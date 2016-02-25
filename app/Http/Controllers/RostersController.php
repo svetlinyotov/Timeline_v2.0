@@ -42,6 +42,12 @@ class RostersController extends Controller
 
     public function store(Request $request, $user_id)
     {
+        if(Auth::user()->role == "supadmin") {
+            $company_id = $request->get('company_id');
+        }else{
+            $company_id = $this->company_id[0];
+        }
+
         $this->validate($request, [
             'time_range' => ['regex:/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}\s(AM|PM)\s-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}\s(AM|PM)/'],
             'address' => 'required',
@@ -54,19 +60,23 @@ class RostersController extends Controller
         if(Roster::overlap($user_id, Common::formatDateTimeForSQL($start), Common::formatDateTimeForSQL($end)) === true){
             return response()->json(['range' => 'The time range overlaps for this user.'], 422);
         }
+        if(!Common::isInTheFuture(Common::formatDateTimeForSQL($start))){
+            return response()->json(['range' => 'You cannot add event in the past'], 422);
+        }
 
-        $roster = new Roster();
-        $roster->name = $request->input('name');
-        $roster->is_supervisor = $request->input('is_supervisor');
-        $roster->start_time = Common::formatDateTimeForSQL($start);
-        $roster->end_time = Common::formatDateTimeForSQL($end);
-        $roster->other = $request->input('other');
-        $roster->address = $request->input('address');
-        $roster->coordinates = $request->input('coordinates');
-        $roster->added_by = Auth::user()->id;
-        $roster->save();
+        $roster = [];
+        $roster['id'] = $user_id;
+        $roster['name'] = $request->input('name');
+        $roster['is_supervisor'] = $request->input('is_supervisor');
+        $roster['start_time'] = Common::formatDateTimeForSQL($start);
+        $roster['end_time'] = Common::formatDateTimeForSQL($end);
+        $roster['other'] = $request->input('other');
+        $roster['address'] = $request->input('address');
+        $roster['coordinates'] = $request->input('coordinates');
+        $roster['added_by'] = Auth::user()->id;
+        $roster['company_id'] = $company_id;
 
-        User::find($user_id)->rosters()->attach($roster->id);
+        Roster::add($roster);
 
         Notification::add($user_id, 'CREATE_EVENT', ['start'=>Common::formatDateTimeForSQL($start), 'end'=>Common::formatDateTimeForSQL($end), 'admin_id' => Auth::user()->id]);
 
@@ -130,7 +140,7 @@ class RostersController extends Controller
                 return response()->json(['range' => 'You are not authorized to cancel event'], 422);
 
             if(($roster->status == '' || $roster->status == 'pending') || Auth::user()->role != "worker"){
-                DB::update("UPDATE roster_user SET status = ? WHERE user_id = ? AND roster_id = ?", [$request->input('status'), $user_id, $roster->id]);
+                DB::update("UPDATE roster_user SET status = ?, is_supervisor = ? WHERE user_id = ? AND roster_id = ?", [$request->input('status'), $request->input('is_supervisor'), $user_id, $roster->id]);
             }else{
                 return response()->json(['range' => 'You cannot update this event'], 422);
             }
@@ -140,7 +150,6 @@ class RostersController extends Controller
 
         if(Auth::user()->role != "worker") {
             $roster->name = $request->input('name');
-            $roster->is_supervisor = $request->input('is_supervisor');
             $roster->start_time = Common::formatDateTimeForSQL($start);
             $roster->end_time = Common::formatDateTimeForSQL($end);
             $roster->other = $request->input('other');

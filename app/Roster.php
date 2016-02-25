@@ -34,7 +34,7 @@ class Roster extends Model
           rosters.other as description,
           rosters.address as address,
           rosters.coordinates as coordinates,
-          rosters.is_supervisor as supervisor,
+          ru.is_supervisor as supervisor,
           ru.status as status,
           users.email as user,
           CASE
@@ -46,35 +46,51 @@ class Roster extends Model
           FROM rosters
           left JOIN roster_user ru ON ru.roster_id = rosters.id
           LEFT JOIN users ON users.id = ru.user_id
-          LEFT JOIN company_user cu ON cu.user_id = users.id
           WHERE
-            cu.company_id = ?
+            rosters.company_id = ?
             AND (start_time BETWEEN ? and ? OR end_time BETWEEN ? and ?)
           ", [$company_id, $data['start'], $data['end'], $data['start'], $data['end']]);
     }
 
-    public static function overlap($user_id, $start, $end, $event_id=null)
+    public static function add(Array $data) : bool
+    {
+        $pdo = DB::connection()->getPdo();
+        $roster_insert = DB::insert("INSERT INTO rosters (company_id, name, start_time, end_time, other, address, coordinates, added_by, updated_at, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            [$data['company_id'], $data['name'], $data['start_time'], $data['end_time'], $data['other'], $data['address'], $data['coordinates'], $data['added_by'], new \DateTime(), new \DateTime()]);
+
+        if($roster_insert){
+            $id = $pdo->lastInsertId();
+            $roster_user_insert = DB::insert("INSERT INTO roster_user (user_id, is_supervisor, roster_id) VALUES (?,?,?)", [$data['id'], $data['is_supervisor'], $id]);
+            if($roster_user_insert){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function overlap(int $user_id, $start, $end, $event_id = null)
     {
         $where = "";
         if($event_id != null){
-            $where = DB::raw("AND id != ?");
+            $where = DB::raw("AND id != :event_id");
         }
         $query = DB::select("
             SELECT * FROM rosters
-            WHERE id NOT IN (
+            WHERE id IN (
                 SELECT rosters.id
                 FROM rosters
-                LEFT JOIN roster_user ru ON ru.roster_id = rosters.id
-                WHERE ru.user_id = ? AND
-                      ((start_time <= ? AND start_time <= ? AND end_time <= ? AND end_time <= ?) OR
-                      (start_time >= ? AND start_time >= ? AND end_time >= ? AND end_time >= ?))
+                JOIN roster_user ru ON ru.roster_id = rosters.id
+                WHERE ru.user_id = :user_id AND
+                      (:end >= start_time AND end_time >= :start)
             ) $where
             ",
-            $event_id==null?[$user_id, $start, $end, $start, $end, $start, $end, $start, $end, $user_id]:[$user_id, $start, $end, $start, $end, $start, $end, $start, $end, $user_id, $event_id]);
+            $event_id==null?['user_id' => $user_id, 'start'=>$start, 'end'=>$end]:['user_id' => $user_id, 'start'=>$start, 'end'=>$end, 'event_id' => $event_id]);
+
         return count($query) != 0;
     }
 
-    public static function payment($id, $company_id) : float
+    public static function payment(int $id, string $company_id) : float
     {
         $company_shift_start = Company::where('id', $company_id)->select('shift_day_start as day', 'shift_night_start as night')->first();
 
