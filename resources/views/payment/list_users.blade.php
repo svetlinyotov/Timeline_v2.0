@@ -148,7 +148,7 @@
                         <td class="text-right">{{$user['salary']}}</td>
                         <td>{{$currency}}</td>
                         <td>
-                            <a href="{{asset('payments/user/'.$user['id'].'/shifts')}}?start={{$_GET['start'] ?? ''}}&end={{$_GET['end'] ?? ''}}" class="btn btn-info btn-xs"><i class="fa fa-clock-o"></i> </a>
+                            <a href="{{asset('payments/user/'.$user['id'].'/shifts')}}?start={{$_GET['start'] ?? ''}}&end={{$_GET['end'] ?? ''}}&company_id={{$_GET['company_id'] ?? ''}}" class="btn btn-info btn-xs"><i class="fa fa-clock-o"></i> </a>
                             <a href="{{asset('users/'.$user['id'].'?rel=payment')}}" class="btn btn-primary btn-xs"><i class="fa fa-eye"></i> </a>
                         </td>
                     </tr>

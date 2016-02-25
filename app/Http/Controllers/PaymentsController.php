@@ -45,11 +45,11 @@ class PaymentsController extends Controller
     {
         $start_time = $request->get('start') ?? date("Y-m-d", strtotime("-1 month"));
         $end_time = $request->get('end') ?? date("Y-m-d", strtotime("now"));
+        $company_id = (Auth::user()->role == "supadmin")?$request->get('company_id') : $this->company_id;
 
         $email = User::where('id', $user_id)->select('email')->pluck('email');
-        $company_id = User::where('id', $user_id)->select('company_id')->pluck('company_id');
         $currency = Company::find($company_id)->currency->title;
-        $data = Payment::shifts($user_id, $start_time, $end_time);
+        $data = Payment::shifts($user_id, $company_id, $start_time, $end_time);
 
         return view('payment.shifts')->with(['data' => $data, 'currency' => $currency, 'user_email' => $email, 'user_id' => $user_id, 'user_company_id' => $company_id]);
     }
@@ -84,12 +84,6 @@ class PaymentsController extends Controller
         return redirect()->back()->with(['message' => 'Data successfully updated']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         //

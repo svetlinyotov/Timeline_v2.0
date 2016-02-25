@@ -1,18 +1,17 @@
 @extends('layouts.master')
 
 @section('style')
-    <link rel="stylesheet" href="{{asset("plugins/datatables/dataTables.bootstrap.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/select2/select2.min.css")}}">
-    <link rel="stylesheet" href="{{asset("plugins/daterangepicker/daterangepicker.css")}}">
+    <link rel="stylesheet" href="{{asset("/css/plugins/dataTables/datatables.min.css")}}">
+    <link rel="stylesheet" href="{{asset("/css/plugins/select2/select2.min.css")}}">
+    <link rel="stylesheet" href="{{asset("/css/plugins/daterangepicker/daterangepicker-bs3.css")}}">
 @stop
 
 @section('script')
-    <script src="{{asset("plugins/datatables/jquery.dataTables.min.js")}}"></script>
-    <script src="{{asset("plugins/datatables/dataTables.bootstrap.js")}}"></script>
-    <script src="{{asset("plugins/slimScroll/jquery.slimscroll.min.js")}}"></script>
-    <script src="{{asset("plugins/select2/select2.full.min.js")}}"></script>
+    <script src="{{asset("/js/plugins/dataTables/datatables.min.js")}}"></script>
+    <script src="{{asset("/js/plugins/slimScroll/jquery.slimscroll.min.js")}}"></script>
+    <script src="{{asset("/js/plugins/select2/select2.full.min.js")}}"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
-    <script src="{{asset("plugins/daterangepicker/daterangepicker.js")}}"></script>
+    <script src="{{asset("/js/plugins/daterangepicker/daterangepicker.js")}}"></script>
     <script>
         $(function () {
 
@@ -67,7 +66,7 @@
     <div class="box">
         <div class="box-body">
             @if(Session::has('message'))
-                <div class="callout callout-success callout-sm">
+                <div class="alert alert-success">
                     <i class="fa fa-check"></i> {!! Session::get('message') !!}
                 </div>
             @endif

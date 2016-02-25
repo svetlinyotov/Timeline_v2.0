@@ -31,12 +31,13 @@ class Payment extends Model
         return $arr;
     }
 
-    public static function shifts($user_id, $start, $end)
+    public static function shifts($user_id, $company_id, $start, $end)
     {
         $arr = [];
-        $rosters = Roster::where('user_id', $user_id)->whereBetween('start_time', [$start, $end])->get();
+        //TODO add compay_id in where clause
+        $rosters = Roster::whereHas('users', function($q) use ($user_id) {$q->where('users.id', $user_id);})->whereBetween('start_time', [$start, $end])->get();
         foreach ($rosters as $roster) {
-            $amount = Roster::payment($roster->id);
+            $amount = Roster::payment($roster->id, $company_id);
             array_push($arr, ['start' => $roster->start_time, 'end' => $roster->end_time, 'real_start' => $roster->real_start_time, 'real_end' => $roster->real_end_time,'amount' => $amount, 'id' => $roster->id, 'address' => $roster->address]);
         }
 
