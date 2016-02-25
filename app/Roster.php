@@ -14,7 +14,7 @@ class Roster extends Model
 
     public function users()
     {
-        return $this->belongsToMany('App\User');
+        return $this->belongsToMany('App\User')->withPivot('is_supervisor', 'real_start_time', 'real_end_time', 'status');
     }
 
     public function added_by_user()
@@ -90,22 +90,23 @@ class Roster extends Model
         return count($query) != 0;
     }
 
-    public static function payment(int $id, string $company_id) : float
+    public static function payment(int $id, $user_id, string $company_id) : float
     {
         $company_shift_start = Company::where('id', $company_id)->select('shift_day_start as day', 'shift_night_start as night')->first();
 
-        $roster = Roster::where('id',$id)->select('real_start_time as start', 'real_end_time as end', 'is_supervisor')->first();
 
-        if($roster->start != null && $roster->end != null) {
-            $start_str = strtotime($roster->start);
-            $end_str = strtotime($roster->end);
+        $roster = Roster::find($id)->users()->where('users.id', $user_id)->first();
+
+        if(count($roster) > 0 && $roster->pivot->real_start_time != null && $roster->pivot->real_start_time != null) {
+            $start_str = strtotime($roster->pivot->real_start_time);
+            $end_str = strtotime($roster->pivot->real_end_time);
             $arr_times = [];
 
 
             for ($i = $start_str; $i <= $end_str; $i += 300) {
                 $id = date("N", $i) - 1;
                 if (Common::isTimeBetween(date("H:i:s", $i), $company_shift_start->day, $company_shift_start->night)) $id .= "_day"; else $id .= "_night";
-                if ($roster->is_supervisor == 1) $id .= "_supervisor"; else $id .= "_worker";
+                if ($roster->pivot->is_supervisor == 1) $id .= "_supervisor"; else $id .= "_worker";
                 !isset($arr_times[$id]) ? $arr_times[$id] = 1 : $arr_times[$id] += 1;
             }
 
@@ -115,6 +116,7 @@ class Roster extends Model
                 list($day, $period, $type) = explode('_', $key);
                 $amount = Payment::week($day, $period, $type, $company_id);
                 $payment += $amount * ((5 / 60) * $time_count);
+                //return var_dump($amount);
             }
 
             return number_format((float)$payment, 2, '.', '')??0;
