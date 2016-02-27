@@ -17,16 +17,23 @@
             $(".timezone_input").select2();
 
             $("#data").DataTable({
-                columnDefs: [
-                    {orderable: false, targets: -1}
-                ],
-                "paging": false,
-                "lengthChange": false,
-                "searching": false,
-                "ordering": true,
-                "info": false,
-                "autoWidth": true,
-                //"order": [[ 0, "desc" ]]
+                dom: '<"html5buttons"B>lTfgitp',
+                buttons: [
+                    { extend: 'copy', title: 'Users List Payment'},
+                    {extend: 'csv', title: 'Users List Payment'},
+                    {extend: 'excel', title: 'Users List Payment'},
+                    {extend: 'pdf', title: 'Users List Payment'},
+                    {extend: 'print',
+                        customize: function (win){
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+                            $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
             });
 
 			$('#daterange-btn').daterangepicker(

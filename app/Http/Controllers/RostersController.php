@@ -26,11 +26,15 @@ class RostersController extends Controller
     {
         if(Auth::user()->role == "supadmin") {
             $company_id = $request->get('company_id');
+        }elseif(Auth::user()->role == "worker"){
+            $company_id = implode(",", $this->company_id);
         }else{
             $company_id = $this->company_id[0];
         }
-        $start_shift = $end_shift = "";
-        if($company_id){
+
+        $start_shift = $end_shift = "00:00";
+
+        if($company_id && Auth::user()->role != "worker"){
             $start_shift = Company::find($company_id)->shift_day_start;
             $end_shift = Company::find($company_id)->shift_night_start;
         }

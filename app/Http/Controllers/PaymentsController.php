@@ -31,7 +31,6 @@ class PaymentsController extends Controller
         }else{
             $company_id = $this->company_id[0];
         }
-
         $currency = $company_id!=null ? Company::find($company_id)->currency->title : null;
 
         if(Auth::user()->role == "supadmin") {
@@ -47,7 +46,7 @@ class PaymentsController extends Controller
         $start_time = $request->get('start') ? date("Y-m-d", strtotime($request->get('start')." -1 day")) : date("Y-m-d", strtotime("-1 month -1 day"));
         $end_time = $request->get('end') ? date("Y-m-d", strtotime($request->get('end')." +1 day")) : date("Y-m-d", strtotime("+1 day"));
 
-        $company_id = (Auth::user()->role == "supadmin")?$request->get('company_id') : $this->company_id;
+        $company_id = (Auth::user()->role == "supadmin")?$request->get('company_id') : $this->company_id[0];
 
         $email = User::where('id', $user_id)->select('email')->pluck('email');
         $currency = Company::find($company_id)->currency->title;

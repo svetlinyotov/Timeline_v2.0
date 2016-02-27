@@ -88,22 +88,23 @@ class User extends Model implements AuthenticatableContract,
           rosters.other as description,
           rosters.address as address,
           rosters.coordinates as coordinates,
-          rosters.is_supervisor as supervisor,
-          rosters.status as status,
-          users.email as user,
+          c.id as comapny_id,
+          c.name as comapny_name,
+          ru.is_supervisor as supervisor,
+          ru.status as status,
+          u.email as user,
           CASE
-              WHEN rosters.status = 'pending' OR rosters.status = '' THEN 'color-gray'
-              WHEN rosters.status = 'accepted' THEN 'color-green'
-              WHEN rosters.status = 'declined' THEN 'color-red'
-              WHEN rosters.status = 'canceled' THEN 'color-white'
+              WHEN ru.status = 'pending' OR ru.status = '' THEN 'color-gray'
+              WHEN ru.status = 'accepted' THEN 'color-green'
+              WHEN ru.status = 'declined' THEN 'color-red'
+              WHEN ru.status = 'canceled' THEN 'color-white'
           END as className
           FROM rosters
           left JOIN roster_user ru ON ru.roster_id = rosters.id
-          LEFT JOIN users ON users.id = ru.user_id
-          LEFT JOIN company_user cu ON cu.user_id = users.id
-          LEFT JOIN companies c ON cu.company_id = c.id
+          LEFT JOIN users u ON u.id = ru.user_id
+          LEFT JOIN companies c ON c.id = rosters.company_id
           WHERE
-            cu.user_id = ?
+            u.id = ?
             AND (start_time BETWEEN ? and ? OR end_time BETWEEN ? and ?)
           ", [$user_id, $data['start'], $data['end'], $data['start'], $data['end']]);
     }
