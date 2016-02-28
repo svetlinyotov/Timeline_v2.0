@@ -40,6 +40,14 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('payments/user/{user_id}/shifts', 'PaymentsController@update');
         Route::put('/companies/{company_id}/link', 'UsersController@linkUser');
     });
+
+    Route::group(['middleware' => 'auth.worker'], function () {
+        Route::get('availability', 'AvailabilityController@index');
+        Route::get('availability/google', 'AvailabilityController@googleList');
+        Route::get('auth/google/provider', 'Auth\AuthController@redirectToGoogleProvider');
+        Route::get('auth/google/callback', 'Auth\AuthController@handleGoogleProviderCallback');
+    });
+
     Route::resource('users', 'UsersController');
     Route::get('/users/{user_id}/notifications', 'UsersController@showAllNotifications');
     Route::delete('/users/{user_id}/unlink/{company_id}', 'UsersController@unlinkCompany');

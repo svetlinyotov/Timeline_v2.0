@@ -51,11 +51,16 @@
                     </a>
                 </li>
                 @if(Auth::user()->role == "worker")
-                        <!-- <li class="{{ Request::segment(1) == 'availability' ? "active" : null }}">
-                        <a href="{{asset("availability")}}">
+                    <li class="{{ Request::segment(1) == 'availability' ? "active" : null }}">
+                        <a href="">
                             <i class="fa fa-clock-o"></i> <span class="nav-label">Availability</span>
                         </a>
-                    </li>-->
+                        <ul class="nav nav-second-level">
+                            <li class="{{ Request::segment(2) == 'create' ? "active" : null }}"><a href="{{asset("availability/create")}}">Add</a></li>
+                            <li class="{{ Request::segment(2) == '' ? "active" : null }}"><a href="{{asset("availability")}}">List</a></li>
+                            <li class="{{ Request::segment(2) == 'google' ? "active" : null }}"><a href="{{asset("availability/google")}}">Google Calendars <span class="label label-primary pull-right">NEW</span></a></li>
+                        </ul>
+                    </li>
                 @endif
                 @if(Auth::user()->role == "supadmin")
                     <li class="{{ Request::segment(1) == 'companies' ? "active" : null }}">
@@ -82,8 +87,8 @@
                             <i class="fa fa-money"></i> <span class="nav-label">Payments</span>
                         </a>
                     </li>
-                    @endif
-                    @if(Auth::user()->role == "supadmin")
+                @endif
+                @if(Auth::user()->role == "supadmin")
                             <!--<li class="{{ Request::segment(1) == 'archive' ? "active" : null }}">
                         <a href="{{asset("archive")}}">
                             <i class="fa fa-archive"></i> <span class="nav-label">Archive data</span>
