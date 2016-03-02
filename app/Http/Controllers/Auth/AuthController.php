@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\ExternalRequest;
+use App\GoogleUser;
+use App\Tokens;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Validator;
 use App\Http\Controllers\Controller;
@@ -41,7 +44,7 @@ class AuthController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array  $data
+     * @param  array $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
@@ -56,7 +59,7 @@ class AuthController extends Controller
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array  $data
+     * @param  array $data
      * @return User
      */
     protected function create(array $data)
@@ -84,22 +87,6 @@ class AuthController extends Controller
         ])->redirect();
     }
 
-    /**
-     * @param $code
-     * @return object {access_token: string, refresh_token:string, expires_in:int, id_token:string, token_type:string}
-     */
-    public function getGoogleTokens($code)
-    {
-        $url = 'https://www.googleapis.com/oauth2/v3/token';
-
-        return ExternalRequest::POST($url, [
-            'code' => $code,
-            'grant_type' => 'authorization_code',
-            'client_id' => env('GOOGLE_CLIENT_ID'),
-            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-            'redirect_uri' => env('GOOGLE_REDIRECT_URL')
-        ]);
-    }
 
     /**
      * Obtain the user information from Google.
@@ -109,18 +96,56 @@ class AuthController extends Controller
      */
     public function handleGoogleProviderCallback(Request $request)
     {
-        if($request->get('error') == "access_denied"){
+        if ($request->get('error') == "access_denied") {
             return redirect('/');
         }
 
-        $user = Socialite::driver('google')->user();
-
         $authorizationCode = $request->get('code');
 
-        $googleTokens = $this->getGoogleTokens($authorizationCode);
+        $googleTokens = Tokens::getGoogleTokens($authorizationCode);
+        //return var_dump($googleTokens);
+        $user = Socialite::driver('google')->getUserByToken($googleTokens->access_token);
+        $email = $user['emails'][0]['value'];
+        $name = $user['name']['givenName'] . " " . $user['name']['familyName'];
+        $avatar = $user['image']['url'];
 
+        if (!GoogleUser::existsByEmailAndId($email, Auth::user()->id) && isset($googleTokens->refresh_token)) {
+            GoogleUser::create([
+                'user_id' => Auth::user()->id,
+                'email' => $email,
+                'names' => $name,
+                'avatar' => $avatar,
+                'googleAccessToken' => $googleTokens->access_token,
+                'googleRefreshToken' => $googleTokens->refresh_token,
+                'uriCode' => $authorizationCode,
+                'expireValue' => $googleTokens->expires_in
+            ]);
+            return redirect('/availability/google')->with(['message' => 'You have linked this profile (' . $email . ')']);
 
-        return var_dump($authorizationCode, $googleTokens, $user);
+        } elseif (GoogleUser::existsByEmailAndId($email, Auth::user()->id) && isset($googleTokens->refresh_token)) {
+            $id = GoogleUser::where('email', '=', $email)->where('user_id', '=', Auth::user()->id)->select('id')->first()->pluck('id')['id'];
+            GoogleUser::updateTokens($id, [
+                'googleAccessToken' => $googleTokens->access_token,
+                'googleRefreshToken' => $googleTokens->refresh_token,
+                'uriCode' => $authorizationCode,
+                'expireValue' => $googleTokens->expires_in
+            ]);
+            return redirect('/availability/google')->with(['message' => 'You already have this profile (' . $email . '). Data is updated.']);
+
+        } elseif (GoogleUser::existsByEmailAndId($email, Auth::user()->id) && !isset($googleTokens->refresh_token)) {
+            return redirect('/availability/google')->with(['message' => 'You already have this profile (' . $email . ')']);
+
+        } elseif (!GoogleUser::existsByEmailAndId($email, Auth::user()->id) && !isset($googleTokens->refresh_token)) {
+            return redirect('/availability/google')->withErrors(['Missing refresh token. Contact the administrator.']);
+
+        } else {
+            return var_dump($authorizationCode, $googleTokens, $user);
+            abort(500, "Auth error. Contact the admin");
+        }
+
+        return redirect('/availability/google');
 
     }
+
+
 }
