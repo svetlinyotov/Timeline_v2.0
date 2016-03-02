@@ -63,6 +63,16 @@ class User extends Model implements AuthenticatableContract,
         return $this->hasMany('App\Messages');
     }
 
+    public function google_accounts()
+    {
+        return $this->hasMany('App\GoogleUser');
+    }
+
+    public static function existsByEmail($email)
+    {
+        return self::where('email', '=', $email)->count();
+    }
+
     public static function notLinkedCompanies($user_id)
     {
         return DB::select("
