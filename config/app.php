@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'url' => 'http://beta.timeline.snsdevelop.com',
+    'url' => 'http://timetracker.snsdevelop.com',
 
     /*
     |--------------------------------------------------------------------------
@@ -109,7 +109,6 @@ return [
     */
 
     'providers' => [
-
         Laravel\Socialite\SocialiteServiceProvider::class,
 
         /*
