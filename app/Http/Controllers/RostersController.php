@@ -171,6 +171,7 @@ class RostersController extends Controller
     {
         return response()->json(Company::workers($company_id));
     }
+
     public function events($company_id, Request $request)
     {
         if(Auth::user()->role == "worker")
