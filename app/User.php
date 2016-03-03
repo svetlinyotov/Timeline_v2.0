@@ -68,6 +68,11 @@ class User extends Model implements AuthenticatableContract,
         return $this->hasMany('App\GoogleUser');
     }
 
+    public function availabilities()
+    {
+        return $this->hasMany('App\Availability');
+    }
+
     public static function existsByEmail($email)
     {
         return self::where('email', '=', $email)->count();
