@@ -2,33 +2,20 @@
 
 @section('style')
     <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/fullcalendar.min.css")}}">
-    <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/scheduler.min.css")}}">
     <link rel="stylesheet" href="{{asset("css/plugins/fullcalendar/fullcalendar.print.css")}}" media="print">
-    <link rel="stylesheet" href="{{asset("css/plugins/iCheck/custom.css")}}">
     <link rel="stylesheet" href="{{asset("css/plugins/toastr/toastr.min.css")}}">
-    <link rel="stylesheet" href="{{asset("css/plugins/daterangepicker/daterangepicker-bs3.css")}}">
+    <link rel="stylesheet" href="{{asset("css/plugins/sweetalert/sweetalert.css")}}">
 @stop
 
 @section('script')
     <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key={{env('MAP_KEY')}}&v=3.exp"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
     <script src="{{asset("js/plugins/fullcalendar/fullcalendar.js")}}"></script>
-    <script src="{{asset("js/plugins/fullcalendar/scheduler.min.js")}}"></script>
-    @if(Auth::user()->role != "worker")
-        <script src="{{asset("js/mapAddUser.js")}}"></script>
-    @endif
-    <script src="{{asset("js/mapRosters.js")}}"></script>
-    <script src="{{asset("js/plugins/daterangepicker/daterangepicker.js")}}"></script>
-    <script src="{{asset("js/plugins/iCheck/icheck.min.js")}}"></script>
     <script src="{{asset("js/plugins/toastr/toastr.min.js")}}"></script>
+    <script src="{{asset("js/plugins/sweetalert/sweetalert.min.js")}}"></script>
 
     <script>
         $(function () {
-
-            $('input[type="checkbox"]').iCheck({
-                checkboxClass: 'icheckbox_minimal-blue',
-                radioClass: 'iradio_minimal-blue'
-            });
 
             toastr.options = {
                 "closeButton": false,
@@ -48,83 +35,113 @@
                 "hideMethod": "fadeOut"
             };
 
-            $('.time_picker').daterangepicker({
-                timePicker: true,
-                timePickerIncrement: 5,
-                minDate: new Date(new Date().setDate(new Date().getDate()-1)),
-                locale: {
-                    format: 'MM/DD/YYYY h:mm A'
+            var update_function = function(event, delta, revertFunc) {
+                $.ajax({
+                    url: '{{asset('/availability/events')}}/'+event.id,
+                    method: "POST",
+                    data: {new_time_start:event.start.format(), new_time_end:event.end.format(), "_token":'{{csrf_token()}}'},
+                    success: function () {
+                        $("#calendar").fullCalendar('refetchEvents');
+                        toastr["success"]("Times updated.",event.start.format()+" <br> "+event.end.format());
+                    },
+                    error: function (msg) {
+                        revertFunc();
+
+                        toastr["error"]("Error("+msg.status+"): " + msg.responseJSON['range']);
+                    }
+                });
+            };
+
+            $('#calendar').fullCalendar({
+                editable: true,
+                selectable: true,
+                selectHelper: true,
+                height: $(window).height()-300,
+                nowIndicator: true,
+                scrollTime: '00:00',
+                resourceAreaWidth: 220,
+                firstDay: 1,
+                eventLimit: true,
+                businessHours: {
+                    dow: [ 1, 2, 3, 4, 5, 6, 7]
+                },
+                header: {
+                    left: 'today prev,next',
+                    center: 'title',
+                    right: 'agendaDay,agendaWeek,month'
+                },
+                defaultView: 'agendaWeek',
+
+                eventOverlap: false,
+                events: {
+                    url: '{{asset('/availability/events/')}}',
+                    error: function(msg) {
+                        toastr["error"]("Error("+msg.status+"): " + msg.statusText);
+                    }
+                },
+                eventDrop: update_function,
+                eventResize: update_function,
+                eventClick:  function(event, jsEvent, view) {
+                    swal({
+                        title: "Are you sure you want to delete the time shift?",
+                        text: "You can add it later again",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Yes, delete it",
+                        cancelButtonText: "No",
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true,
+                        closeOnCancel: false
+                    },
+                    function (isConfirm) {
+                        $.ajax({
+                            url: "{{asset('availability/events')}}/"+event.id,
+                            type: 'DELETE',
+                            data: {"_token":"{{csrf_token()}}"},
+                            success: function(result) {
+                                refreshCalendar();
+                                swal({
+                                    title:"Deleted!",
+                                    text:"The time shift is deleted",
+                                    type:"success",
+                                    timer:1500
+                                });
+                            },
+                            error: function(result) {
+                                console.log(result);
+                                swal("Error", "Internal error. Please contact global administrator. Error "+result.status+": " + result.statusText, "error");
+                            }
+                        });
+                    });
+                },
+                select: function(start, end, allDay) {
+
+                    $.post("{{asset('availability')}}", {
+                                "start": moment(start).format('DD-MM-YYYY HH:mm:ss'),
+                                "end": moment(end).format('DD-MM-YYYY HH:mm:ss'),
+                                "allDay":!start.hasTime() && !end.hasTime(),
+                                "_token": "{{csrf_token()}}"
+                            },
+                            function (data, status) {
+                                console.log(data);
+                                console.log(status);
+                                if(status == "success") {
+                                    refreshCalendar();
+                                    unselectCalendar();
+                                    toastr["success"](data.msg);
+                                }
+                            }
+                    );
                 }
             });
 
-            $('#add').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget);
-                var id = button.data('id');
-                var name = button.data('name');
-
-                var modal = $(this);
-                modal.find("#address_type").val("");
-                modal.find("#address").html("");
-                modal.find("#coordinates_type").val("");
-                modal.find("#coordinates").html("");
-                modal.find('.modal-title').text('New roster - ' + name);
-                modal.find('input[name=_action]').val('{{asset('/users')}}/'+id+'/roster?company_id={{$_GET['company_id']??''}}');
-            }).on('hidden.bs.modal', function (e) {
-                //history.pushState("", document.title, window.location.pathname);
-                $('#add_error').hide();
-                document.getElementById("add_roster").reset();
-            });
-
-            $('#save_roster').click(function (e) {
-                $.ajax({
-                    url: $('#add').find('input[name=_action]').val(),
-                    method: "POST",
-                    data: $('#add').find('form').serialize(),
-                    dataType: "json",
-                    complete : function (msg) {
-                        if (msg.status != 200) {
-                            var error = [];
-                            $.each(msg.responseJSON, function (idx2, val2) {
-                                error.push(val2);
-                            });
-
-                            $('#add_error').html(error.join("<br>")).show();
-                        }else{
-                            $('#add').modal('hide');
-                            $("#calendar").fullCalendar('refetchEvents');
-                            toastr["success"]("Event saved");
-                        }
-                    }
-                });
-                $("html, body").animate({ scrollTop: 0 }, 200);
-                $("#add").animate({ scrollTop: 0 }, 800);
-
-            });
-            $('#update_roster').click(function (e) {
-                $.ajax({
-                    url: $('#edit').find('input[name=_action]').val(),
-                    method: "POST",
-                    data: $('#edit').find('form').serialize(),
-                    dataType: "json",
-                    complete : function (msg) {
-                        if (msg.status != 200) {
-                            var error = [];
-                            $.each(msg.responseJSON, function (idx2, val2) {
-                                error.push(val2);
-                            });
-
-                            $('#edit_error').html(error.join("<br>")).show();
-                        }else{
-                            $('#edit').modal('hide');
-                            $("#calendar").fullCalendar('refetchEvents');
-                            toastr["success"]("Event updated");
-                        }
-                    }
-                });
-                $("html, body").animate({ scrollTop: 0 }, 200);
-                $("#edit").animate({ scrollTop: 0 }, 800);
-
-            });
+            function refreshCalendar() {
+                $("#calendar").fullCalendar('refetchEvents');
+            }
+            function unselectCalendar() {
+                $("#calendar").fullCalendar('unselect');
+            }
 
             $(window).on('resize', function(){
                 $('#calendar').fullCalendar('option', 'height', $(window).height()-200);
@@ -136,32 +153,44 @@
 
 @section('title')
     <h1>
-        Rosters
+        Availability
         <small></small>
     </h1>
     <ol class="breadcrumb">
         <li><a href="{{asset("/")}}"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Rosters</li>
+        <li class="active">Availability</li>
     </ol>
 @stop
 
 @section('body')
-    @if(Auth::user()->role == "supadmin")
-        Company: <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-            <option></option>
-            @foreach($companies as $company)
-                <option value="{{asset('/rosters')}}?company_id={{$company->id}}" @if(isset($_GET['company_id']) && $_GET['company_id'] == $company->id) selected @endif>{{$company->name}}</option>
-            @endforeach
-        </select>
-        <hr>
-    @endif
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-primary">
-                <div class="box-body no-padding">
-                    <div id="calendar"></div>
+
+    <div class="box">
+        <div class="box-body">
+            @if (count($errors) > 0)
+                <div class="alert alert-danger">
+                    @foreach ($errors->all() as $error)
+                        {{ $error }}<br>
+                    @endforeach
+                </div>
+            @endif
+            @if(Session::has('message') || isset($_GET['message']))
+                <div class="alert alert-success alert-dismissable">
+                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button"><i class="fa fa-times"></i></button>
+                    <i class="fa fa-check"></i> {!! Session::get('message') !!} {!! $_GET['message']??"" !!}
+                </div>
+            @endif
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="box-body no-padding">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+
         </div>
     </div>
 
