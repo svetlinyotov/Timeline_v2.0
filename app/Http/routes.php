@@ -43,6 +43,10 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['middleware' => 'auth.worker'], function () {
         Route::get('availability', 'AvailabilityController@index');
+        Route::post('availability', 'AvailabilityController@create');
+        Route::get('availability/events', 'AvailabilityController@events');
+        Route::post('availability/events/{id}', 'AvailabilityController@update');
+        Route::delete('availability/events/{id}', 'AvailabilityController@destroy');
         Route::get('availability/google', 'AvailabilityController@googleList');
         Route::get('availability/google/{user_id}', 'AvailabilityController@googleListCalendars');
         Route::post('availability/google/{user_id}', 'AvailabilityController@googleSaveCalendar');
