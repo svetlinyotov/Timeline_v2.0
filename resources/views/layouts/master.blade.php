@@ -51,13 +51,12 @@
                     </a>
                 </li>
                 @if(Auth::user()->role == "worker")
-                    <li class="{{ Request::segment(1) == 'availability' ? "active" : null }}">
-                        <a href="">
+                    <li class="{{ Request::segment(1) == 'availability' ? "active" : null }}" onclick="window.location='{{asset("availability")}}'">
+                        <a href="{{asset("availability")}}">
                             <i class="fa fa-clock-o"></i> <span class="nav-label">Availability</span>
                         </a>
                         <ul class="nav nav-second-level">
-                            <li class="{{ Request::segment(2) == 'create' ? "active" : null }}"><a href="{{asset("availability/create")}}">Add</a></li>
-                            <li class="{{ Request::segment(2) == '' ? "active" : null }}"><a href="{{asset("availability")}}">List</a></li>
+                            <li class="{{ Request::segment(2) == '' ? "active" : null }}"><a href="{{asset("availability")}}">Calendar</a></li>
                             <li class="{{ Request::segment(2) == 'google' ? "active" : null }}"><a href="{{asset("availability/google")}}">Google Calendars <span class="label label-primary pull-right">NEW</span></a></li>
                         </ul>
                     </li>
