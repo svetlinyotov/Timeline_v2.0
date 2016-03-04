@@ -7,7 +7,9 @@ use App\Company;
 use App\ImageResize;
 use App\Messages;
 use App\Notification;
+use App\Payment;
 use App\PersonalInfo;
+use App\Roster;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -149,8 +151,18 @@ class UsersController extends Controller
         $notification_obj = Notification::read($id, true, 6);
         $notification_list = Notification::format($notification_obj);
         $messages = Messages::topUnseen(5);
+        $count_of_rosters = Roster::whereBetween('start_time', [date("Y-m-01 00:00:00"), date("Y-m-d 23:59:59")])->whereHas('users', function($q)use($id){$q->where('users.id', '=',$id);})->count();
+        $payment_data = Payment::singleUser(Auth::user(), date("Y-m-01 00:00:00"), date("Y-m-d 23:59:59"));
 
-        return view('users.view')->with(['user' => $user, 'notification_count' => $notification_count, 'notification_list' => $notification_list, 'messages'=>$messages]);
+        return view('users.view')->with([
+            'user' => $user,
+            'notification_count' => $notification_count,
+            'notification_list' => $notification_list,
+            'messages'=>$messages,
+            'count_of_rosters' => $count_of_rosters,
+            'hours_last_month' => $payment_data['time'],
+            'amount_last_month' => $payment_data['salary'],
+        ]);
     }
 
     public function showAllNotifications($id = null)

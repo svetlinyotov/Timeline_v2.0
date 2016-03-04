@@ -53,7 +53,7 @@
     @endif
 
     <div class="row m-b-lg m-t-lg">
-        <div class="col-md-6">
+        <div class="col-md-9">
 
             <div class="profile-image">
                 <img src="{{asset('avatar/'.Auth::user()->info->avatar)}}" class="img-circle circle-border m-b-md" alt="profile">
@@ -84,28 +84,29 @@
                 <tbody>
                 <tr>
                     <td>
-                        Rosters count last month <strong class="pull-right">0</strong>
+                        Rosters count last month <strong class="pull-right">{{$count_of_rosters}}</strong>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        Working time last  <strong class="pull-right">0</strong>
+                        Working time last month <strong class="pull-right">{{$hours_last_month}} hours</strong>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        Amount earned last month <strong class="pull-right">0</strong>
+                        Amount earned last month <strong class="pull-right">${{$amount_last_month}}</strong>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
+        <!--
         <div class="col-md-3">
             <small>Working last week</small>
             <h2 class="no-margins">206 480</h2>
             <div id="sparkline1"></div>
         </div>
-
+        -->
 
     </div>
     <div class="row">
@@ -193,7 +194,7 @@
 
         </div>
 
-        <div class="col-lg-5">
+        <div class="col-lg-4">
 
             <div class="ibox">
                 <div class="ibox-content">
@@ -212,30 +213,11 @@
                     </div>
                 </div>
             </div>
-            @if(Request::segment(1) == 'profile')
-            <div class="ibox">
-                <div class="ibox-content">
-                    <h3><a href="{{asset('/profile/messages')}}?rel=profile"> Messages</a> <small>(last 5 unseen)</small> </h3>
-
-                    <div class="list-group">
-                        @foreach($messages as $message)
-                            <a href="{{asset('/profile/messages/'.$message->id)}}?rel=profile" class="list-group-item">
-                                <b>From: </b> {{$message->user->email}}<br>
-                                <p>{!! $message->text !!}</p>
-                                <small class="pull-right">{{\App\Common::timeAgo($message->created_at)}}</small>
-                            </a>
-                        @endforeach
-                        <a href="{{asset('/profile/messages')}}?rel=profile" class="list-group-item list-group-item-info text-center">
-                            <h3>See All</h3>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @endif
 
         </div>
 
-        <div class="col-lg-4 m-b-lg">
+        <div class="col-lg-5 m-b-lg">
+            <!--
             <div id="vertical-timeline" class="vertical-container light-timeline no-margins">
                 <div class="vertical-timeline-block">
                     <div class="vertical-timeline-icon navy-bg">
@@ -307,7 +289,27 @@
                     </div>
                 </div>
             </div>
+        -->
+            @if(Request::segment(1) == 'profile')
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <h3><a href="{{asset('/profile/messages')}}?rel=profile"> Messages</a> <small>(last 5 unseen)</small> </h3>
 
+                        <div class="list-group">
+                            @foreach($messages as $message)
+                                <a href="{{asset('/profile/messages/'.$message->id)}}?rel=profile" class="list-group-item">
+                                    <b>From: </b> {{$message->user->email}}<br>
+                                    <p>{!! $message->text !!}</p>
+                                    <small class="pull-right">{{\App\Common::timeAgo($message->created_at)}}</small>
+                                </a>
+                            @endforeach
+                            <a href="{{asset('/profile/messages')}}?rel=profile" class="list-group-item list-group-item-info text-center">
+                                <h3>See All</h3>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
     </div>

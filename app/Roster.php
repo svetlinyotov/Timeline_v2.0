@@ -90,7 +90,7 @@ class Roster extends Model
         return count($query) != 0;
     }
 
-    public static function payment(int $id, $user_id, string $company_id) : float
+    public static function payment(int $id, $user_id, string $company_id) : array
     {
         $company_shift_start = Company::where('id', $company_id)->select('shift_day_start as day', 'shift_night_start as night')->first();
 
@@ -111,16 +111,18 @@ class Roster extends Model
             }
 
             $payment = 0;
+            $time = 0;
 
             foreach ($arr_times as $key => $time_count) {
                 list($day, $period, $type) = explode('_', $key);
                 $amount = Payment::week($day, $period, $type, $company_id);
                 $payment += $amount * ((5 / 60) * $time_count);
+                $time += $time_count;
                 //return var_dump($amount);
             }
 
-            return number_format((float)$payment, 2, '.', '')??0;
+            return ['payment' => number_format((float)$payment, 2, '.', '')??0, 'time' => $time];
         }
-        return 0;
+        return ['payment' => 0, 'time' => 0];
     }
 }
