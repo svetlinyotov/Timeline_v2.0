@@ -12,6 +12,12 @@ Route::post('login', 'Auth\AuthController@postLogin');
 Route::get('logout', 'Auth\AuthController@getLogout');
 Route::get('ajax/timezone', 'CommonController@timezone');
 
+Route::get('password/email', 'Auth\PasswordController@getEmail');
+Route::post('password/email', 'Auth\PasswordController@postEmail');
+
+Route::get('password/reset/{token}', 'Auth\PasswordController@getReset');
+Route::post('password/reset', 'Auth\PasswordController@postReset');
+
 Route::group(['middleware' => 'auth'], function () {
     Route::get('profile', 'UsersController@show');
     Route::get('profile/edit', 'UsersController@edit');
