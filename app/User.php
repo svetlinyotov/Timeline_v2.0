@@ -78,6 +78,11 @@ class User extends Model implements AuthenticatableContract,
         return self::where('email', '=', $email)->count();
     }
 
+    public static function getNameById($id)
+    {
+        return PersonalInfo::where('user_id', '=', $id)->select('names')->first()->names;
+    }
+
     public static function notLinkedCompanies($user_id)
     {
         return DB::select("
@@ -122,5 +127,23 @@ class User extends Model implements AuthenticatableContract,
             u.id = ?
             AND (start_time BETWEEN ? and ? OR end_time BETWEEN ? and ?)
           ", [$user_id, $data['start'], $data['end'], $data['start'], $data['end']]);
+    }
+
+    public static function notLinkedWithRoster($id)
+    {
+        $company_id = DB::select("SELECT company_id FROM rosters WHERE id = ?", [$id])[0]->company_id;
+
+        return DB::select("
+            SELECT
+              users.id,
+              email,
+              info.names
+            FROM users
+            JOIN usersPersonalInfo info ON info.user_id = users.id
+            LEFT JOIN company_user cu ON cu.user_id = users.id
+            WHERE cu.company_id = ? AND users.id NOT IN (
+              SELECT user_id FROM roster_user WHERE roster_id = ?
+            )
+        ", [$company_id, $id]);
     }
 }
