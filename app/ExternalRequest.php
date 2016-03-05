@@ -9,9 +9,12 @@ class ExternalRequest
     /**
      * @param $url
      * @param array $params
+     * @param null $user_id
+     * @param null $token
+     * @param null $body
      * @return json
      */
-    public static function POST($url, Array $params)
+    public static function POST($url, Array $params, $user_id = null, $token = null, $body = null)
     {
         $POST_params = "";
         foreach ($params as $key => $param) {
@@ -24,8 +27,27 @@ class ExternalRequest
         curl_setopt($init, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($init, CURLOPT_HEADER, 0);
         curl_setopt($init, CURLOPT_RETURNTRANSFER, 1);
+        if($body){
+            curl_setopt($init, CURLOPT_POSTFIELDS, "$body");
+        }
+        if($token != null){
+            curl_setopt($init, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , "Authorization: Bearer ".$token ));
+        }
 
-        return json_decode(curl_exec($init));
+        $json = json_decode(curl_exec($init));
+
+        if(isset($json -> error )) {
+            if ($json->error->code == 401) {
+                $new_access_token = Tokens::refreshToken($user_id);
+
+                self::POST($url, $params, $user_id, $new_access_token, $body);
+
+            } else {
+                abort(500, $json->error->message);
+            }
+        }
+
+        return $json;
     }
 
     /**

@@ -73,6 +73,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/rosters/workers/{company_id}', 'RostersController@workers');
     Route::get('/rosters/events/{company_id}', 'RostersController@events');
     Route::post('/rosters/events/{event_id}', 'RostersController@updateEvent');
+    Route::get('/rosters/event/{event_id}', 'RostersController@getEvent');
+    Route::get('/rosters/event/{event_id}/unlinkedUsers', 'RostersController@unlinkedUsers');
+    Route::post('/rosters/event/{event_id}/users', 'RostersController@addUsers');
 });
 
 Route::get('avatar/{filename?}', function ($filename = null) {

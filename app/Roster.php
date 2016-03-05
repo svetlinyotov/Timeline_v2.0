@@ -26,30 +26,44 @@ class Roster extends Model
     {
         return DB::select("
           SELECT
-          rosters.id as id,
-          ru.user_id as resourceId,
-          rosters.start_time as start,
-          rosters.end_time as end,
-          rosters.name as title,
-          rosters.other as description,
-          rosters.address as address,
-          rosters.coordinates as coordinates,
-          ru.is_supervisor as supervisor,
-          ru.status as status,
-          users.email as user,
-          CASE
-              WHEN ru.status = 'pending' OR ru.status = '' THEN 'color-gray'
-              WHEN ru.status = 'accepted' THEN 'color-green'
-              WHEN ru.status = 'declined' THEN 'color-red'
-              WHEN ru.status = 'canceled' THEN 'color-white'
-          END as className
-          FROM rosters
-          left JOIN roster_user ru ON ru.roster_id = rosters.id
-          LEFT JOIN users ON users.id = ru.user_id
+              r.id as id,
+              ru.user_id as resourceId,
+              r.start_time as start,
+              r.end_time as end,
+              '' as rendering,
+              users.events_color as color,
+              r.name as title,
+              ru.status as status,
+              CASE
+                  WHEN ru.status = 'pending' OR ru.status = '' THEN 'color-gray'
+                  WHEN ru.status = 'accepted' THEN 'color-green'
+                  WHEN ru.status = 'declined' THEN 'color-red'
+                  WHEN ru.status = 'canceled' THEN 'color-white'
+              END as className
+          FROM rosters r
+              JOIN roster_user ru ON ru.roster_id = r.id
+              LEFT JOIN users ON users.id = ru.user_id
           WHERE
-            rosters.company_id = ?
-            AND (start_time BETWEEN ? and ? OR end_time BETWEEN ? and ?)
-          ", [$company_id, $data['start'], $data['end'], $data['start'], $data['end']]);
+              r.company_id = ?
+              AND (r.start_time BETWEEN ? and ? OR r.end_time BETWEEN ? and ?)
+
+          UNION
+
+          SELECT
+              a.id as id,
+              a.user_id as resourceId,
+              a.start_time as start,
+              a.end_time as end,
+              'background' as rendering,
+              users.events_color as color,
+              '' as title,
+              '' as status,
+              '' as className
+          FROM availability a
+          LEFT JOIN users ON users.id = a.user_id
+          WHERE a.start_time BETWEEN ? and ? OR a.end_time BETWEEN ? and ?
+
+          ", [$company_id, $data['start'], $data['end'], $data['start'], $data['end'], $data['start'], $data['end'], $data['start'], $data['end']]);
     }
 
     public static function add(Array $data) : bool
@@ -102,16 +116,23 @@ class Roster extends Model
             $end_str = strtotime($roster->pivot->real_end_time);
             $arr_times = [];
 
-
-            for ($i = $start_str; $i <= $end_str; $i += 300) {
-                $id = date("N", $i) - 1;
-                if (Common::isTimeBetween(date("H:i:s", $i), $company_shift_start->day, $company_shift_start->night)) $id .= "_day"; else $id .= "_night";
-                if ($roster->pivot->is_supervisor == 1) $id .= "_supervisor"; else $id .= "_worker";
-                !isset($arr_times[$id]) ? $arr_times[$id] = 1 : $arr_times[$id] += 1;
-            }
-
             $payment = 0;
             $time = 0;
+
+            for ($i = $start_str; $i <= $end_str; $i += 300) {
+                $current_checking_time = date("Y-m-d H:i:s", $i);
+                $custom_payment_amount = Payment::custom($current_checking_time);
+
+                if($custom_payment_amount == 0) {
+                    $id = date("N", $i) - 1;
+                    if (Common::isTimeBetween(date("H:i:s", $i), $company_shift_start->day, $company_shift_start->night)) $id .= "_day"; else $id .= "_night";
+                    if ($roster->pivot->is_supervisor == 1) $id .= "_supervisor"; else $id .= "_worker";
+                    !isset($arr_times[$id]) ? $arr_times[$id] = 1 : $arr_times[$id] += 1;
+                }else{
+                    $payment += $custom_payment_amount * (1 / 12);
+                    $time += 1/12;
+                }
+            }
 
             foreach ($arr_times as $key => $time_count) {
                 list($day, $period, $type) = explode('_', $key);
