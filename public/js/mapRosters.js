@@ -1,16 +1,16 @@
-var defaultpos = new google.maps.LatLng(42.90221762882881,23.799324822425888);
-var geocoder;
+var defaultpos2 = new google.maps.LatLng(42.90221762882881,23.799324822425888);
+var geocoder2;
 var marker2;
 var map2;
-var infowindow = new google.maps.InfoWindow();
-var input;
+var infowindow2 = new google.maps.InfoWindow();
+var input2;
 
 function initialize() {
-    geocoder = new google.maps.Geocoder();
+    geocoder2 = new google.maps.Geocoder();
     var mapOptions = {
         zoom: 7,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
-        center: defaultpos
+        center: defaultpos2
     };
 
     map2 = new google.maps.Map(document.getElementById("map-address-new"),
@@ -20,7 +20,7 @@ function initialize() {
         map:map2,
         draggable:true,
         animation: google.maps.Animation.DROP,
-        position: defaultpos
+        position: defaultpos2
     });
     google.maps.event.addListener(marker2, 'click', toggleBounce);
     google.maps.event.addListener(marker2, 'dragend', function(evt){
@@ -45,7 +45,7 @@ function toggleBounce() {
 
 function codeAddressNew() {
     var address = document.getElementById('address_search').value;
-    geocoder.geocode( { 'address': address}, function(results, status) {
+    geocoder2.geocode( { 'address': address}, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
             document.getElementById("coordinates_edit_text").innerHTML = results[0].geometry.location;
             document.getElementById("coordinates_edit").value = results[0].geometry.location;
@@ -57,13 +57,13 @@ function codeAddressNew() {
     });
 }
 
-function codeLatLngNew(input) {
-    input = marker2.getPosition().lat() + "," + marker2.getPosition().lng();
-    var latlngStr = input.split(',', 2);
+function codeLatLngNew(input2) {
+    input2 = marker2.getPosition().lat() + "," + marker2.getPosition().lng();
+    var latlngStr = input2.split(',', 2);
     var lat = parseFloat(latlngStr[0]);
     var lng = parseFloat(latlngStr[1]);
     var latlng = new google.maps.LatLng(lat, lng);
-    geocoder.geocode({'latLng': latlng}, function(results, status) {
+    geocoder2.geocode({'latLng': latlng}, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
             if (results[1]) {
                 map2.setCenter(new google.maps.LatLng(marker2.getPosition().lat(), marker2.getPosition().lng()));
