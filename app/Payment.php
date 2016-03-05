@@ -12,15 +12,20 @@ class Payment extends Model
         return DB::select("SELECT amount FROM payment_week WHERE day = ? AND period = ? AND `type` = ? AND company_id = ?", [$day, $period, $type, $company_id])[0]->amount;
     }
 
+    public static function custom($time)
+    {
+        return DB::select("SELECT SUM(amount) as amount FROM payment_custom WHERE ? BETWEEN time_start AND time_end", [$time])[0]->amount;
+    }
+
     public static function singleUser($user, $start, $end, $company_id = null)
     {
         if($company_id != null) {
             $rosters = Roster::whereHas('users', function ($q) use ($user) {
-                $q->where('users.id', $user->id);
+                $q->where('users.id', $user->id)->where('roster_user.status', '=', 'accepted');
             })->whereBetween('start_time', [$start, $end])->where('company_id', $company_id)->get();
         }else {
             $rosters = Roster::whereHas('users', function ($q) use ($user) {
-                $q->where('users.id', $user->id);
+                $q->where('users.id', $user->id)->where('roster_user.status', '=', 'accepted');
             })->whereBetween('start_time', [$start, $end])->get();
         }
         $sum = 0;
@@ -51,7 +56,14 @@ class Payment extends Model
     public static function shifts($user_id, $company_id, $start, $end)
     {
         $arr = [];
-        $rosters = Roster::whereHas('users', function($q) use ($user_id) {$q->where('users.id', $user_id);})->whereBetween('start_time', [$start, $end])->where('company_id', $company_id)->get();
+        $rosters = Roster::whereHas('users',
+                        function($q) use ($user_id) {
+                            $q->where('users.id', $user_id)->where('roster_user.status', '=', 'accepted');
+                        }
+                    )
+                    ->whereBetween('start_time', [$start, $end])
+                    ->where('company_id', $company_id)
+                    ->get();
 
         foreach ($rosters as $roster) {
             $roster_pivot = $roster->users()->where('users.id', $user_id)->first()->pivot;

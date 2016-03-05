@@ -17,7 +17,7 @@ class GoogleUser extends Model
 
     public function calendars()
     {
-        return $this->hasMany('App\GoogleUserCalendar');
+        return $this->hasMany('App\GoogleUserCalendar', 'user_id');
     }
 
     public static function getUserData($id)
@@ -56,7 +56,7 @@ class GoogleUser extends Model
         $_token = 'google'.ucfirst($token).'Token';
         $data = self::where('id', '=', $id)->select('user_id', $_token)->first();
 
-        if($data->user_id != Auth::user()->id)
+        if(Auth::user()->role == "worker" and $data->user_id != Auth::user()->id)
             abort(401, "Unauthorized request for this session");
 
         return $data->$_token;
