@@ -56,7 +56,7 @@
         <div class="col-md-9">
 
             <div class="profile-image">
-                <img src="{{asset('avatar/'.Auth::user()->info->avatar)}}" class="img-circle circle-border m-b-md" alt="profile">
+                <img src="{{asset('avatar/'.$user->info->avatar)}}" class="img-circle circle-border m-b-md" alt="profile">
             </div>
             <div class="profile-info">
                 <div class="">
@@ -72,12 +72,6 @@
                 </div>
             </div>
         </div>
-
-        @if(Session::has('message'))
-            <div class="alert alert-success">
-                <i class="fa fa-check"></i> {!! Session::get('message') !!}
-            </div>
-        @endif
 
         <div class="col-md-3">
             <table class="table small m-b-xs">
