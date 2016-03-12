@@ -107,10 +107,13 @@ class UsersController extends Controller
         else
             $company_id = $this->company_id[0];
 
+        $rand = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f');
+
         $user = new User();
         $user->role = $request->input('type');
         $user->password = Hash::make($password);
         $user->email = $request->input('email');
+        $user->events_color = '#'.$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)];
         $user->save();
 
         $info = new PersonalInfo();

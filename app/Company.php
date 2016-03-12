@@ -30,7 +30,10 @@ class Company extends Model
         if($company == null) return false;
 
         return DB::select("
-            SELECT u.id, info.names as title
+            SELECT
+              u.id,
+              info.names as title,
+              u.events_color
             FROM users u
             JOIN usersPersonalInfo info on info.user_id = u.id
             LEFT JOIN company_user cu ON cu.user_id = u.id

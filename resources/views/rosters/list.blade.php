@@ -531,6 +531,20 @@
         </div>
     </div>
 
+    @if(isset($workers))
+    <br>
+    <div class="row">
+        <ul class="list-group col-md-4">
+        @foreach($workers as $worker)
+            <li class="list-group-item">
+                <span class="badge" style="background-color: {{$worker->events_color}}">&nbsp;&nbsp;</span>
+                {{$worker->title}}
+            </li>
+        @endforeach
+        </ul>
+    </div>
+    @endif
+
     @if(Auth::user()->role != "worker")
     <div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="add">
         <div class="modal-dialog" role="document">

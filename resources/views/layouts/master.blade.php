@@ -202,7 +202,7 @@
                 Version: <strong>2.5</strong>
             </div>
             <div>
-                <strong>Copyright</strong> <a href="snsdevelop.com">SnSDevelop</a> &copy; {{date("Y")}}
+                <!--<strong>Copyright</strong> <a href="snsdevelop.com">SnSDevelop</a> &copy; {{date("Y")}}-->
             </div>
         </div>
 

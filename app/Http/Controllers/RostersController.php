@@ -45,7 +45,13 @@ class RostersController extends Controller
 
         $companies = Company::listAll();
         $workers = Company::workers($company_id);
-        return view('rosters.list')->with(['company_id' => $company_id, 'shift_start'=>$start_shift, 'shift_end' => $end_shift, 'workers' => $workers, 'companies' => $companies]);
+        return view('rosters.list')->with([
+            'company_id' => $company_id,
+            'shift_start'=>$start_shift,
+            'shift_end' => $end_shift,
+            'workers' => $workers,
+            'companies' => $companies
+        ]);
     }
 
     public function store(Request $request, $user_id)
